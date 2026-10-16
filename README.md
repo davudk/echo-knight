@@ -26,6 +26,8 @@ Click the screen to start (locks the mouse). Press **Esc** to release it / pause
 | Echo: place · recall | E / RMB | Y / Triangle, LB / L1 |
 | Recenter camera | Q / MMB | R3 |
 | Toggle help · FPS | H · F3 | — |
+| Mute · volume − / + | M · `-` / `=` | — |
+| Training: input history + last move · move list | T · F1 | — |
 
 ## Mechanics
 
@@ -53,6 +55,9 @@ The ruined pillars and the stepping stones to the south-west are climbable; try 
 | `src/fx/*` | Hologram shader, ghosts/afterimages, particles, sword trail, shockwaves |
 | `src/world/*` | Terrain heightfield, props & colliders, training dummies, sky/lighting |
 | `src/ui/HUD.ts` | Control prompts (auto-switch by device), ability bar, combo pips, damage numbers |
+| `src/audio/*` | Procedural WebAudio sound effects (`sounds.ts` recipes, `audioFeature.ts` event → sound map). Dev: `sfx.debug = true` logs every sound with its event, `await sfxTest()` renders each recipe offline |
+| `src/ui/StyleMeter.ts` | Combo hit counter + D→S style rank (loadout `combat.styleMeter`) |
+| `src/ui/Training.ts` | Training overlay: input history, last-move readout, move list generated from `config/moveList.ts` |
 
 In the browser console, `game` is exposed for debugging (e.g. `game.player.state`, `game.step(0.5)`).
 
