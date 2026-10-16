@@ -203,6 +203,82 @@ export const Sounds = {
     v.partials({ base: 660, ratios: [1, 1.5, 2, 3], dur: 0.8, gain: 0.05, attack: 0.02 });
     v.noise({ f0: 1200, f1: 3000, q: 1, dur: 0.3, attack: 0.05, gain: 0.08 });
   },
+  // ---------------------------------------------------------------- stormcaller (src/boss/stormcaller)
+  /** lightning strike: sharp crack + short rumble */
+  stormStrike(v) {
+    v.noise({ f0: 5200, f1: 1800, q: 0.6, dur: 0.12, gain: 0.5 });
+    v.osc({ type: 'square', f0: 2400, f1: 180, dur: 0.08, gain: 0.08, lowpass: 5000 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 420, f1: 90, dur: 0.7, attack: 0.01, gain: 0.55 });
+    for (let i = 0; i < 4; i++) v.noise({ f0: rnd(2500, 6000), q: 3, dur: 0.025, gain: rnd(0.08, 0.16), delay: 0.02 + i * rnd(0.02, 0.05) });
+  },
+  /** big thunderclap (intensity) or a distant rumble (variant 'far') */
+  stormThunder(v) {
+    const far = v.variant === 'far';
+    const k = Math.max(0.4, v.intensity || 1);
+    if (!far) {
+      v.noise({ f0: 4000, f1: 900, q: 0.5, dur: 0.25, gain: 0.45 * k });
+      thud(v, 70, 28, 0.9, 0.7 * k);
+    }
+    v.noise({ color: 'brown', filter: 'lowpass', f0: far ? 220 : 380, f1: 60, dur: far ? 2.4 : 2.0, attack: far ? 0.3 : 0.02, gain: (far ? 0.5 : 0.85) * k });
+    for (let i = 0; i < 5; i++) v.noise({ color: 'brown', filter: 'lowpass', f0: rnd(150, 300), dur: rnd(0.3, 0.6), gain: rnd(0.15, 0.3) * k, delay: 0.25 + i * rnd(0.15, 0.3) });
+  },
+  /** electric crackle (spells charging, chains) */
+  stormCrackle(v) {
+    const k = Math.max(0.3, v.intensity || 1);
+    for (let i = 0; i < 9; i++) v.noise({ f0: rnd(2000, 7000), q: 2.5, dur: rnd(0.015, 0.04), gain: rnd(0.06, 0.16) * k, delay: i * rnd(0.025, 0.07) });
+    v.osc({ type: 'sawtooth', f0: 120, f1: 95, dur: 0.5, attack: 0.05, gain: 0.05 * k, lowpass: 1800 });
+  },
+  /** a bolt leaves her staff */
+  stormZap(v) {
+    v.osc({ type: 'sawtooth', f0: 1800, f1: 300, dur: 0.16, gain: 0.08, lowpass: 4500 });
+    v.noise({ f0: 3500, f1: 1500, q: 1.2, dur: 0.12, gain: 0.22 });
+  },
+  /** teleport: variant 'charge' (shimmer at the destination) / 'arrive' */
+  stormBlink(v) {
+    if (v.variant === 'charge') {
+      v.partials({ base: 1180, ratios: [1, 1.34, 1.79], dur: 0.55, gain: 0.035, attack: 0.2, spread: 0.3 });
+      v.noise({ f0: 2500, f1: 7000, q: 3, dur: 0.5, attack: 0.3, gain: 0.06 });
+    } else {
+      v.noise({ f0: 6000, f1: 1500, q: 0.8, dur: 0.15, gain: 0.3 });
+      v.osc({ f0: 300, f1: 900, dur: 0.12, gain: 0.08 });
+      v.noise({ color: 'brown', filter: 'lowpass', f0: 350, dur: 0.3, gain: 0.25 });
+    }
+  },
+  /** rune eruption */
+  stormRune(v) {
+    v.osc({ type: 'triangle', f0: 520, f1: 160, dur: 0.18, gain: 0.12 });
+    v.noise({ f0: 2600, f1: 900, q: 1.4, dur: 0.14, gain: 0.25 });
+    thud(v, 120, 50, 0.2, 0.35);
+  },
+  /** orbs: 'pop' (popped by a hit), 'boom' (exploded on you), 'glass' (mirror image shatters) */
+  stormOrb(v) {
+    if (v.variant === 'glass') {
+      v.partials({ base: 1650, ratios: [1, 1.41, 2.13, 2.9], dur: 0.6, gain: 0.06, spread: 0.6 });
+      for (let i = 0; i < 6; i++) v.noise({ f0: rnd(4000, 8000), q: 5, dur: 0.03, gain: rnd(0.05, 0.12), delay: i * rnd(0.02, 0.06) });
+    } else if (v.variant === 'boom') {
+      thud(v, 140, 45, 0.35, 0.8);
+      v.noise({ f0: 3000, f1: 700, q: 0.7, dur: 0.25, gain: 0.4 });
+    } else {
+      v.osc({ f0: 900, f1: 2200, dur: 0.1, gain: 0.08 });
+      v.noise({ f0: 4000, q: 2, dur: 0.08, gain: 0.15 });
+    }
+  },
+  /** floor tiles: 'crack' warning, 'fall' */
+  stormTile(v) {
+    if (v.variant === 'crack') {
+      for (let i = 0; i < 7; i++) v.noise({ f0: rnd(700, 2200), q: 4, dur: rnd(0.02, 0.05), gain: rnd(0.12, 0.25), delay: i * rnd(0.04, 0.1) });
+      v.noise({ color: 'brown', filter: 'lowpass', f0: 200, dur: 0.6, gain: 0.3 });
+    } else {
+      thud(v, 90, 30, 0.6, 0.8);
+      v.noise({ color: 'brown', filter: 'lowpass', f0: 500, f1: 120, dur: 0.8, gain: 0.6 });
+    }
+  },
+  /** wind gust ('warn' = rising whistle) */
+  stormWind(v) {
+    const warn = v.variant === 'warn';
+    v.noise({ f0: warn ? 400 : 700, f1: warn ? 1200 : 300, q: 0.8, dur: warn ? 1.0 : 1.7, attack: warn ? 0.8 : 0.15, gain: warn ? 0.18 : 0.35 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 300, dur: warn ? 0.9 : 1.6, attack: 0.3, gain: warn ? 0.1 : 0.3 });
+  },
   // ---------------------------------------------------------------- ui
   uiClick(v) {
     v.osc({ f0: 1800, f1: 1400, dur: 0.035, gain: 0.1 });
