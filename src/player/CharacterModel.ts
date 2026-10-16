@@ -127,6 +127,22 @@ export class CharacterModel {
     this.swordBase[axis] = hilt + (tip - hilt) * 0.3;
   }
 
+  private fade = 1;
+  /** Fade the whole character (camera pressed up against it). */
+  setFade(alpha: number) {
+    if (Math.abs(alpha - this.fade) < 0.01) return;
+    this.fade = alpha;
+    this.model.traverse((o) => {
+      const m = o as Mesh;
+      if (!m.isMesh) return;
+      for (const mat of Array.isArray(m.material) ? m.material : [m.material]) {
+        mat.transparent = alpha < 1;
+        mat.opacity = alpha;
+        mat.depthWrite = alpha >= 1;
+      }
+    });
+  }
+
   has(name: string) {
     return this.actions.has(name);
   }

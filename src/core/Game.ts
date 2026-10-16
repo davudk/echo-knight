@@ -275,6 +275,8 @@ export class Game {
     this.fx.update(rawDt);
 
     this.cam.update(this.player.position, rawDt);
+    // Fade the knight when the camera is squeezed against it (back to a wall).
+    this.player.model.setFade(Math.min(1, Math.max(0.15, (this.cam.boomLength - 0.5) / 0.9)));
     for (const f of this.features) f.lateUpdate?.(rawDt, this);
     this.sky.update(this.player.position, this.cam.camera.position);
 

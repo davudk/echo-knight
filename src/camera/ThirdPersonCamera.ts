@@ -16,6 +16,10 @@ export class ThirdPersonCamera {
 
   private pivot = new Vector3();
   private distance: number = T.distance;
+  /** current boom length (after collision) */
+  get boomLength() {
+    return this.distance;
+  }
   private trauma = 0;
   private fovKick = 0;
   private recenterTarget: number | null = null;
@@ -103,19 +107,22 @@ export class ThirdPersonCamera {
     const dir = this.tmp.set(-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp);
 
     // Collision: march along the boom and stop before terrain / buildings.
+    // Fine steps (0.25 m) so thin walls are caught; with your back to a wall the camera may come
+    // in very close (the character fades out, see Game) instead of ending up inside the wall.
     let maxD = T.distance;
-    const steps = 14;
+    const steps = Math.ceil(T.distance / 0.25);
     for (let i = 1; i <= steps; i++) {
       const d = (i / steps) * T.distance;
       const x = this.pivot.x + dir.x * d;
       const y = this.pivot.y + dir.y * d;
       const z = this.pivot.z + dir.z * d;
       if (this.world.pointBlocked(x, y, z, 0.3)) {
-        maxD = Math.max(T.minDistance, ((i - 1) / steps) * T.distance);
+        maxD = Math.max(0.45, ((i - 1) / steps) * T.distance);
         break;
       }
     }
     // Pull in fast, ease out slowly.
+    if (maxD < T.minDistance && maxD > 0.45) maxD = Math.min(T.minDistance, maxD);
     this.distance = maxD < this.distance ? lerp(this.distance, maxD, damp(30, dt)) : lerp(this.distance, maxD, damp(4, dt));
 
     this.desired.copy(this.pivot).addScaledVector(dir, this.distance);
