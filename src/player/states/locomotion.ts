@@ -97,6 +97,8 @@ export function tryJump(p: Player): boolean {
   p.grounded = false;
   p.variableJump = true;
   if (airJump) {
+    // Each air jump restores the air dashes: jump → dash → jump → dash chains.
+    p.airDashCharges = p.maxAirDashes;
     p.ctx.fx.waves.spawn(p.position.clone(), 1.2, Colors.dash, 0.3, 0.25);
     p.ctx.fx.afterimage(0.25);
   } else {

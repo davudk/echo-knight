@@ -54,7 +54,7 @@ Conflicting picks are greyed out with the reason (e.g. Echo Platform excludes Ae
   parry → slow-mo + riposte for double damage) · *Perfect Dodge* (roll right as a hit lands → witch time) ·
   *Counter* (press block when the "!" flashes over an attacking enemy → cinematic reversal). Optional **Stamina**
   rules make rolls, dashes, blocks and heavies cost stamina.
-- **Movement kit** (loadout): double/triple jump with flips, 1–2 air dashes (eight-way: hold jump to dash up,
+- **Movement kit** (loadout): double/triple jump with flips, 1–2 air dashes, restored by every air jump (eight-way: hold jump to dash up,
   sprint to dash down), slide → long jump, wall-run + wall kick (also chimney-climb between close walls), ledge
   grab / vault / hang / shimmy / climb (on by default).
 - **Parkour gym** (east of the arena): slide bar → long-jump gap, wall-run lane, ledge stairs to a tower with a

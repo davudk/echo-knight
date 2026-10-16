@@ -94,7 +94,7 @@ export const Upgrades: UpgradeDef[] = [
   {
     id: 'move.airDashes', kind: 'tier', category: 'movement', levels: [1, 2], default: 1,
     name: 'Air Dashes',
-    description: 'Air dash charges per airtime.',
+    description: 'Air dash charges per jump (each air jump restores them).',
   },
   {
     id: 'move.dashDir', kind: 'choice', category: 'movement', default: 'horizontal',
