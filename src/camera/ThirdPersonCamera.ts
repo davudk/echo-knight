@@ -1,5 +1,5 @@
 import { PerspectiveCamera, Vector3 } from 'three';
-import { Tuning } from '../config/tuning';
+import { CombatTuning, Tuning } from '../config/tuning';
 import { clamp, damp, dampAngle, lerp } from '../core/math';
 import type { World } from '../world/World';
 
@@ -23,6 +23,12 @@ export class ThirdPersonCamera {
   private readonly tmp = new Vector3();
   private readonly desired = new Vector3();
 
+  /** Lock-on: world point to keep framed (set every frame by the lock-on controller), null = free. */
+  lockPoint: Vector3 | null = null;
+  /** horizontal look input accumulated while locked (target-switch flicks) */
+  private flick = 0;
+  private readonly lookAtPoint = new Vector3();
+
   constructor(
     aspect: number,
     private readonly world: World,
@@ -43,6 +49,11 @@ export class ThirdPersonCamera {
   }
 
   addLook(dx: number, dy: number) {
+    if (this.lockPoint) {
+      // Locked: the camera frames the target; horizontal input becomes target-switch flicks.
+      this.flick += dx;
+      return;
+    }
     if (dx !== 0 || dy !== 0) this.recenterTarget = null;
     this.yaw -= dx;
     this.pitch = clamp(this.pitch + dy, T.pitchMin, T.pitchMax);
@@ -51,6 +62,14 @@ export class ThirdPersonCamera {
   /** Swing behind the character (yaw = character facing). */
   recenter(facing: number) {
     this.recenterTarget = facing;
+  }
+
+  /** Accumulated horizontal flick since the last call (radians, + = right); decays over time. */
+  takeFlick(threshold: number): number {
+    if (Math.abs(this.flick) < threshold) return 0;
+    const f = this.flick;
+    this.flick = 0;
+    return f;
   }
 
   shake(amount: number) {
@@ -63,7 +82,9 @@ export class ThirdPersonCamera {
 
   update(target: Vector3, dt: number) {
     this.time += dt;
-    if (this.recenterTarget !== null) {
+    this.flick *= Math.exp(-10 * dt);
+    if (this.lockPoint) this.trackLock(target, dt);
+    else if (this.recenterTarget !== null) {
       this.yaw = dampAngle(this.yaw, this.recenterTarget, 10, dt);
       if (Math.abs(this.yaw - this.recenterTarget) < 0.01) this.recenterTarget = null;
     }
@@ -109,7 +130,10 @@ export class ThirdPersonCamera {
     const oy = (Math.sin(t * 1.7 + 1) + Math.sin(t * 3.1) * 0.5) * 0.18 * s;
 
     this.camera.position.copy(this.desired);
-    this.camera.lookAt(this.pivot.x, this.pivot.y, this.pivot.z);
+    // While locked, aim a little toward the target so both stay framed (launched targets too).
+    this.lookAtPoint.copy(this.pivot);
+    if (this.lockPoint) this.lookAtPoint.y += clamp((this.lockPoint.y - this.pivot.y) * 0.35, -0.6, 2.2);
+    this.camera.lookAt(this.lookAtPoint);
     this.camera.position.x += ox * Math.cos(this.yaw);
     this.camera.position.y += oy;
     this.camera.position.z -= ox * Math.sin(this.yaw);
@@ -120,5 +144,19 @@ export class ThirdPersonCamera {
       this.camera.fov = fov;
       this.camera.updateProjectionMatrix();
     }
+  }
+
+  private trackLock(player: Vector3, dt: number) {
+    const L = CombatTuning.lockOn;
+    const lp = this.lockPoint!;
+    const dx = lp.x - player.x;
+    const dz = lp.z - player.z;
+    const d = Math.hypot(dx, dz);
+    if (d > 0.5) this.yaw = dampAngle(this.yaw, Math.atan2(dx, dz) + L.yawOffset, L.sharpness, dt);
+    // Lower the camera when the target is above us (juggles), raise it a touch when close.
+    const elev = Math.atan2(lp.y - (player.y + T.pivotHeight), Math.max(2, d));
+    const want = clamp(L.pitch - elev * 0.6 + (d < 3 ? 0.1 : 0), T.pitchMin, 0.8);
+    this.pitch = lerp(this.pitch, want, damp(L.sharpness * 0.5, dt));
+    this.recenterTarget = null;
   }
 }
