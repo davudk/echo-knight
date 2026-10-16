@@ -13,7 +13,6 @@ export class HUD {
   private readonly toast: HTMLElement;
   private readonly pips: HTMLElement[] = [];
   private readonly dash: { el: HTMLElement; arc: SVGCircleElement };
-  private readonly echo: { el: HTMLElement; arc: SVGCircleElement; label: HTMLElement; key: HTMLElement };
   private readonly dashKey: HTMLElement;
   private readonly numbers: { el: HTMLElement; pos: Vector3; age: number; life: number; vx: number }[] = [];
   private fpsAcc = 0;
@@ -59,10 +58,9 @@ export class HUD {
       return el;
     };
     const dashEl = mk('ready', 'Dash');
-    const echoEl = mk('ready', 'Echo');
+    // The echo widget lives in ui/EchoHud.ts (mounted into this bar by the echo feature).
     this.dash = { el: dashEl, arc: dashEl.querySelector('.arc')! };
     this.dashKey = dashEl.querySelector('.key')!;
-    this.echo = { el: echoEl, arc: echoEl.querySelector('.arc')!, label: echoEl.querySelector('.label')!, key: echoEl.querySelector('.key')! };
   }
 
   /** Mount a feature's HUD widget (absolute-positioned element). */
@@ -134,7 +132,6 @@ export class HUD {
         )
         .join('')}</div>`;
     this.dashKey.textContent = L.dodge;
-    this.echo.key.textContent = L.echo;
   }
 
   toggleHelp() {
@@ -149,7 +146,8 @@ export class HUD {
 
   update(
     dt: number,
-    s: { combo: number; dashCharges: number; airborne: boolean; echoState: string; echoProgress: number; echoTimer: number },
+    // echo* fields are unused (ui/EchoHud.ts draws the echo); kept optional so callers stay valid
+    s: { combo: number; dashCharges: number; airborne: boolean; echoState?: string; echoProgress?: number; echoTimer?: number },
   ) {
     this.pips.forEach((p, i) => p.classList.toggle('on', i <= s.combo));
 
@@ -157,11 +155,6 @@ export class HUD {
     const dashReady = s.dashCharges > 0;
     this.dash.el.className = `ability ${dashReady ? 'ready' : 'cool'}`;
     this.dash.arc.style.strokeDashoffset = `${dashReady ? 0 : CIRC}`;
-
-    const ep = s.echoState === 'active' ? s.echoProgress : s.echoState === 'cooldown' ? s.echoProgress : 1;
-    this.echo.el.className = `ability ${s.echoState === 'active' ? 'echo' : s.echoState === 'ready' ? 'ready' : 'cool'}`;
-    this.echo.arc.style.strokeDashoffset = `${CIRC * (1 - ep)}`;
-    this.echo.label.textContent = s.echoState === 'active' ? `${s.echoTimer.toFixed(1)}` : 'Echo';
 
     if (this.toastTimer > 0) {
       this.toastTimer -= dt;

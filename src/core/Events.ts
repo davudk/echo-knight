@@ -33,6 +33,12 @@ export interface GameEvents {
   'echo:placed': { position: Vector3; index: number };
   'echo:recalled': { from: Vector3; to: Vector3; mode: string };
   'echo:expired': { position: Vector3 };
+  /** Echo press refused (e.g. mid-air without Aerial Echo). */
+  'echo:fizzle': { position: Vector3; reason: string };
+  /** A mimic echo repeated one of the player's attacks. */
+  'echo:mimic': { position: Vector3; move: string };
+  /** Arrival shockwave after a recall. */
+  'echo:shockwave': { position: Vector3; radius: number };
   'enemy:hit': { position: Vector3; damage: number; heavy: boolean };
   'enemy:died': { position: Vector3 };
   'enemy:attack': { position: Vector3 };
