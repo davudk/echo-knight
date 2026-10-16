@@ -255,21 +255,25 @@ export class Game {
 
     // Hitstop nearly freezes gameplay; slow-mo scales it. Camera + particles keep real time.
     let dt = rawDt;
+    let playerDt = rawDt;
     if (this.slowmoTimer > 0) {
       this.slowmoTimer -= rawDt;
       dt *= this.slowmoScale;
+      // witch time: the player can be (partly) exempt from slow-mo
+      playerDt *= this.slowmoScale + (1 - this.slowmoScale) * this.player.slowmoExempt;
       if (this.slowmoTimer <= 0) this.slowmoScale = 1;
     }
     if (this.hitstopTimer > 0) {
       this.hitstopTimer -= rawDt;
       dt = rawDt * 0.04;
+      playerDt = dt;
     }
     this.gameDt = dt;
 
     this.cam.addLook(this.input.look.x, this.input.look.y);
     if (this.input.pressed('recenter')) this.cam.recenter(this.player.facing);
 
-    this.player.update(dt);
+    this.player.update(playerDt);
     for (const f of this.features) f.update?.(dt, this);
     for (const d of this.dummies) d.update(dt);
     this.fx.update(rawDt);

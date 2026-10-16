@@ -96,6 +96,11 @@ export class Player {
   stateTime = 0;
   grounded = true;
   invulnerable = false;
+  /**
+   * 0..1: how much of a global slow-mo the player ignores (witch time: the world slows, you don't).
+   * Game.frame scales the player's dt by lerp(slowmoScale, 1, slowmoExempt). Hitstop still applies.
+   */
+  slowmoExempt = 0;
 
   // Health (enemies stream)
   maxHealth = 100;

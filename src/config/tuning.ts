@@ -237,6 +237,66 @@ export const Tuning = {
       maxVy: 2.5,
     },
   },
+  /** Defense styles + stamina (player/states/defense.ts). Times in gameplay seconds unless noted. */
+  defense: {
+    /** frontal arc that blocks / parries (degrees, centred on facing) */
+    blockArcDeg: 120,
+    blockMoveSpeed: 2.4,
+    /** while moving in guard, facing turns toward the camera forward at this rate */
+    blockTurnRate: 9,
+    /** minimum time in the block state (a tap still shows the guard) */
+    blockMinTime: 0.14,
+    /** fraction of a blocked hit's damage that still gets through (never lethal) */
+    chip: 0.2,
+    /** pushback on a blocked hit (× the hit's knockback) */
+    blockPushback: 0.6,
+    /** parry: block pressed at most this long before a frontal hit */
+    parryWindow: 0.15,
+    /** a press that does not parry locks parrying out for this long (no mashing) */
+    parryMissCooldown: 0.4,
+    /** [scale, real seconds] */
+    parrySlowmo: [0.25, 0.4] as [number, number],
+    /** after a parry the next light / heavy attack within this window is a riposte */
+    riposteWindow: 1.2,
+    riposteMul: 2,
+    riposteHitstop: 0.2,
+    /** perfect dodge: the roll started at most this long before the hit */
+    perfectDodgeWindow: 0.2,
+    /** witch time: world slow-mo; the player keeps `playerExempt` of the lost speed (1 = full speed) */
+    witchTime: { scale: 0.3, duration: 2.0, playerExempt: 0.8 },
+    counter: {
+      range: 3,
+      /** enemy must be inside this arc in front of the player (degrees) */
+      arcDeg: 150,
+      /** prompt + input window before the enemy's hit frame */
+      window: 0.4,
+      /** pressing too early (enemy winding up nearby, outside the window) locks the counter out */
+      missLockout: 0.3,
+      /** strike damage (the countered enemy is vulnerable: ×1.5 → ~30) */
+      damage: 20,
+      knockback: 8,
+      stagger: 1.0,
+      strikeAt: 0.2,
+      duration: 0.62,
+      cancelAt: 0.42,
+      slowmo: [0.3, 0.3] as [number, number],
+    },
+    /** stamina ran out while blocking */
+    guardBreak: { duration: 0.6, damageFrac: 0.5 },
+    stamina: {
+      max: 100,
+      roll: 18,
+      airDash: 15,
+      heavy: 14,
+      light: 6,
+      blockHit: 12,
+      /** per second, after `regenDelay` without spending */
+      regen: 35,
+      regenDelay: 0.6,
+      /** regen multiplier while holding block */
+      blockRegenMul: 0.35,
+    },
+  },
 };
 
 // ====================================================================== combat (offense stream)
