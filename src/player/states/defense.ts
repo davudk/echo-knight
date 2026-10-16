@@ -351,6 +351,8 @@ function endWitchTime() {
 // ------------------------------------------------------------------ riposte
 function onPlayerHit(target: { position: Vector3; onHit(info: HitInfo): void }, info: HitInfo) {
   if (s.riposteActive <= 0 || info.source === 'echo' || info.move === 'riposte' || info.move === 'counter') return;
+  // A boss finisher already turned this hit into an execution; don't stack the parry bonus on it.
+  if ((target as { finisherAt?: number }).finisherAt === game.time) return;
   const bonus = Math.round(info.damage * (D.riposteMul - 1));
   if (bonus <= 0) return;
   // Extra hit for the bonus (same direction, no extra knockback) — keeps combat.ts untouched.

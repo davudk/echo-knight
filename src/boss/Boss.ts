@@ -911,8 +911,12 @@ export class Boss implements Hittable, EffectOwner {
   }
 
   /** The execution finisher. */
+  /** game time of the last finisher (other damage bonuses skip that hit) */
+  finisherAt = -1;
+
   protected riposte() {
     const { game } = this;
+    this.finisherAt = game.time;
     this.riposteOpen = false;
     this.vulnerable = false;
     const dmg = Math.round(this.def.riposte.damage);
