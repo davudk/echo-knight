@@ -20,19 +20,44 @@ Click the screen to start (locks the mouse). Press **Esc** to release it / pause
 | Move | WASD / arrows | Left stick (analog walk → run) |
 | Camera | Mouse | Right stick |
 | Sprint | Left Ctrl (hold) | L3 or LT (hold) |
-| Jump (hold = higher) | Space | A / Cross |
-| Roll · **Air dash** when airborne | Shift | B / Circle |
-| Attack — 3-hit combo, plunge when airborne | LMB / J | X / Square, RB / R1 |
-| Echo: place · recall (tap; hold = recall) | E / RMB | Y / Triangle, LB / L1 |
-| Recenter camera | Q / MMB | R3 |
+| Jump (hold = higher; air jumps with the upgrade) | Space | A / Cross |
+| Roll · **Air dash** when airborne · **Slide** when sprinting (upgrade) | Shift | B / Circle |
+| Light attack | LMB / J | X / Square |
+| Heavy attack (hold = charge) | RMB / K | Y / Triangle, RT / R2 |
+| Light + Heavy together: Whirlwind | LMB+RMB / J+K | X+Y |
+| Block · Parry · Counter (depends on Defense Style) | F / U / mouse back button | LB / L1 |
+| Echo: tap = place / recall, hold = recall latest | E / L / mouse forward button | RB / R1 |
+| Lock-on (no target = recenter camera) | R / MMB | R3 |
+| Recenter camera | Q | R3 |
+| **Loadout** (pauses) | Tab | Back / Select |
+| Pause | Esc | Start |
 | Toggle help · FPS | H · F3 | — |
 | Mute · volume − / + | M · `-` / `=` | — |
 | Training: input history + last move · move list | T · F1 | — |
 
+### Loadout
+
+Press **Tab** (gamepad **Back**) to open the Loadout: every ability is an upgrade you can toggle, tier up or pick
+between, and changes apply instantly. Presets: **Base**, **Acrobat** (triple jump, wall-runs, slides, echo platforms),
+**Assassin** (shadow clones that fight with you, swap), **Brawler** (counters, rewind), **Everything**.
+Conflicting picks are greyed out with the reason (e.g. Echo Platform excludes Aerial Echo); "Switch anyway" resolves them.
+
 ## Mechanics
 
-- **Combo**: slash right→left, slash left→right, then a Riven-style leap that slams down with an AoE shockwave.
-  Inputs are buffered; each attack steers toward your stick; roll/jump cancel after the hit frame.
+- **Combo strings** (full list in-game with **F1**): L L L (two slashes + Riven-style leap slam), L L H launcher
+  (then jump after it for an air combo ending in a spike), L H spinning slash, H H H heavy string (the kick
+  guard-breaks), hold H to charge 3 tiers, → H lunging stab, ← L backflip slash, roll → L sweep, air dash → L
+  piercing dash strike, L+H whirlwind. Inputs are buffered; attacks steer toward your stick (or your lock-on
+  target); roll/jump cancel after the hit frame.
+- **Defense style** (loadout, pick one): *Block & Parry* (hold to block frontal hits; tap just before a hit to
+  parry → slow-mo + riposte for double damage) · *Perfect Dodge* (roll right as a hit lands → witch time) ·
+  *Counter* (press block when the "!" flashes over an attacking enemy → cinematic reversal). Optional **Stamina**
+  rules make rolls, dashes, blocks and heavies cost stamina.
+- **Movement kit** (loadout): double/triple jump with flips, 1–2 air dashes (eight-way: hold jump to dash up,
+  sprint to dash down), slide → long jump, wall-run + wall kick (also chimney-climb between close walls), ledge
+  grab / vault / hang / shimmy / climb (on by default).
+- **Parkour gym** (east of the arena): slide bar → long-jump gap, wall-run lane, ledge stairs to a tower with a
+  chimney; crossing the start line starts a timer, standing on the tower top stops it (best time saved).
 - **Roll** (ground): somersault with i-frames; backstep when no direction is held. Roll can be jump-cancelled to carry momentum.
 - **Air dash** (Shift / B in the air): fast horizontal dash with afterimages. One charge per airtime, refreshed on landing or recall.
 - **Plunge**: attack while airborne (> ~1 m up) to dive down and slam.

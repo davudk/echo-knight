@@ -1,5 +1,7 @@
 import { Vector3 } from 'three';
 import type { Game } from './Game';
+import { loadout } from './Loadout';
+import { events } from './Events';
 
 /**
  * Dev-only test harness, exposed as `window.dbg`. Lets you (or an agent driving a browser)
@@ -15,6 +17,7 @@ import type { Game } from './Game';
  *   await dbg.sheet('label', [0.1, 0.2, ...], setupFn)  contact sheet of frames (shown on top of page)
  *   dbg.clearSheets()
  *   dbg.state()                  compact player/echo state string
+ *   dbg.loadout / dbg.events     the game's loadout and event bus (don't import them from the console)
  */
 export function installDebug(game: Game) {
   const keys = (code: string, down: boolean) =>
@@ -23,6 +26,9 @@ export function installDebug(game: Game) {
 
   const dbg = {
     game,
+    /** the game's own loadout / event bus instances (dynamic imports after HMR can load duplicates) */
+    loadout,
+    events,
     freeze(v = true) {
       game.setFrozen(v);
     },
