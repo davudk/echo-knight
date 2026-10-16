@@ -133,11 +133,11 @@ export class Loadout {
     return { ok: true };
   }
 
-  /** Reset to defaults then apply a preset (conflicting entries are skipped). */
+  /** Reset to defaults then apply a preset (conflicting entries are skipped). Challenge settings are kept. */
   applyPreset(presetId: string) {
     const p = Presets.find((x) => x.id === presetId);
     if (!p) return;
-    for (const d of Upgrades) this.values.set(d.id, d.default);
+    for (const d of Upgrades) if (d.category !== 'challenge') this.values.set(d.id, d.default);
     for (const [id, v] of Object.entries(p.values)) this.set(id, v, { silent: true });
     this.save();
     for (const d of Upgrades) events.emit('loadout:changed', { id: d.id, value: this.values.get(d.id)! });

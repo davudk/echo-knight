@@ -166,6 +166,43 @@ export const Sounds = {
     v.noise({ f0: 5000, f1: 7000, q: 3, dur: 0.12, attack: 0.03, gain: 0.18 });
     v.osc({ f0: 2093, dur: 0.18, attack: 0.005, gain: 0.03 });
   },
+  // ---------------------------------------------------------------- bosses
+  /** wind-up cue; variant = telegraph colour (parryable / unblockable / magic) */
+  bossTelegraph(v) {
+    if (v.variant === 'unblockable') {
+      v.osc({ type: 'sawtooth', f0: 110, f1: 70, dur: 0.45, attack: 0.02, gain: 0.12, lowpass: 900 });
+      v.partials({ base: 220, ratios: [1, 1.06, 2.1], dur: 0.5, gain: 0.07, type: 'square' });
+      v.noise({ color: 'brown', filter: 'lowpass', f0: 300, dur: 0.3, gain: 0.25 });
+    } else if (v.variant === 'magic') {
+      v.partials({ base: 880, ratios: [1, 1.5, 2.25, 3.01], dur: 0.7, gain: 0.05, attack: 0.03, spread: 0.4 });
+      v.noise({ f0: 3000, f1: 6000, q: 2, dur: 0.4, attack: 0.1, gain: 0.08 });
+    } else {
+      v.noise({ f0: 5200, f1: 7400, q: 3, dur: 0.16, attack: 0.02, gain: 0.2 });
+      v.partials({ base: 1320, ratios: [1, 2.4], dur: 0.35, gain: 0.04 });
+    }
+  },
+  bossRoar(v) {
+    v.osc({ type: 'sawtooth', f0: 95, f1: 60, dur: 1.4, attack: 0.15, gain: 0.16, lowpass: 600 });
+    v.osc({ type: 'sawtooth', f0: 142, f1: 88, dur: 1.3, attack: 0.2, gain: 0.08, lowpass: 900 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 500, f1: 180, dur: 1.4, attack: 0.15, gain: 0.5 });
+  },
+  bossStagger(v) {
+    v.partials({ base: 330, ratios: [1, 2.76, 5.4], dur: 0.9, gain: 0.12, spread: 0.5 });
+    thud(v, 140, 50, 0.35, 0.7);
+  },
+  bossDefeated(v) {
+    thud(v, 70, 24, 1.4, 0.9);
+    v.partials({ base: 196, ratios: [1, 1.5, 2, 3], dur: 2.6, gain: 0.06, attack: 0.3 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 400, f1: 80, dur: 1.6, gain: 0.5 });
+  },
+  fogGate(v) {
+    v.noise({ f0: 400, f1: 1600, q: 0.7, dur: 0.9, attack: 0.25, gain: 0.25 });
+    v.partials({ base: 262, ratios: [1, 1.5, 2], dur: 1.0, gain: 0.04, attack: 0.2 });
+  },
+  flask(v) {
+    v.partials({ base: 660, ratios: [1, 1.5, 2, 3], dur: 0.8, gain: 0.05, attack: 0.02 });
+    v.noise({ f0: 1200, f1: 3000, q: 1, dur: 0.3, attack: 0.05, gain: 0.08 });
+  },
   // ---------------------------------------------------------------- ui
   uiClick(v) {
     v.osc({ f0: 1800, f1: 1400, dur: 0.035, gain: 0.1 });

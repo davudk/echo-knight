@@ -6,7 +6,6 @@ import { events } from '../../core/Events';
 import type { Game } from '../../core/Game';
 import { loadout } from '../../core/Loadout';
 import { clamp, dampAngle } from '../../core/math';
-import type { Enemy } from '../../enemy/Enemy';
 import type { Feature } from '../../features';
 import { DefenseHud } from '../../ui/DefenseHud';
 import { StaminaBar } from '../../ui/StaminaBar';
@@ -33,6 +32,20 @@ const C = D.counter;
 const tmpV = new Vector3();
 
 type Style = 'block-parry' | 'perfect-dodge' | 'counter';
+
+/** Anything the counter style can reverse: enemies, bosses (`attacking` = a counterable swing is coming). */
+export interface CounterThreat {
+  readonly alive?: boolean;
+  readonly attacking: boolean;
+  readonly attackTimeRemaining: number;
+  readonly feet: Vector3;
+  readonly position: Vector3;
+  readonly radius: number;
+  onCountered(): void;
+  onHit(info: HitInfo): void;
+}
+/** Extra counter-threat lists besides `game.enemies` (the boss framework registers one). */
+export const counterThreatSources: (() => readonly CounterThreat[])[] = [];
 const style = () => loadout.str('defense.style') as Style;
 
 let game: Game;
@@ -53,7 +66,7 @@ const s = {
   /** witch time remaining (real seconds) */
   witch: 0,
   witchTotal: 1,
-  counterTarget: null as Enemy | null,
+  counterTarget: null as CounterThreat | null,
   counterStruck: false,
   counterLockout: 0,
   guardBreakDir: new Vector3(),
@@ -236,7 +249,7 @@ function defend(p: Player, hit: IncomingHit): HitResult | null {
     return 'dodged';
   }
   if (p.state === 'block' && !hit.unblockable && frontal(p, hit)) {
-    if (st === 'block-parry' && s.parryArmed && s.clock - s.parryArmedAt <= D.parryWindow) return parry(p, hit);
+    if (st === 'block-parry' && s.parryArmed && s.clock - s.parryArmedAt <= D.parryWindow && hit.parryable !== false) return parry(p, hit);
     return blockHit(p, hit);
   }
   return null;
@@ -419,20 +432,24 @@ function guardBreakVisual(p: Player, o: { pitch: number }) {
 }
 
 // ------------------------------------------------------------------ counter
-function counterCandidate(p: Player): Enemy | null {
-  const list = game.enemies?.list;
-  if (!list) return null;
+function counterCandidate(p: Player): CounterThreat | null {
+  let best = counterCandidateIn(p, game.enemies?.list ?? [], null);
+  for (const src of counterThreatSources) best = counterCandidateIn(p, src(), best);
+  return best;
+}
+
+function counterCandidateIn(p: Player, list: readonly CounterThreat[], best: CounterThreat | null): CounterThreat | null {
   const f = p.forward;
   const cosArc = Math.cos(((C.arcDeg / 2) * Math.PI) / 180);
-  let best: Enemy | null = null;
   for (const e of list) {
-    if (!e.alive || !e.attacking) continue;
+    if (e.alive === false || !e.attacking) continue;
     const tr = e.attackTimeRemaining;
     if (!(tr > 0 && tr <= C.window)) continue;
     const dx = e.feet.x - p.position.x;
     const dz = e.feet.z - p.position.z;
     const d = Math.hypot(dx, dz);
-    if (d > C.range || Math.abs(e.feet.y - p.position.y) > 1.5) continue;
+    // big targets (bosses) count from their body edge, grunts (r 0.5) are unchanged
+    if (d > C.range + Math.max(0, e.radius - 0.5) || Math.abs(e.feet.y - p.position.y) > 1.5) continue;
     if (d > 0.8 && (dx * f.x + dz * f.z) / d < cosArc) continue;
     if (!best || tr < best.attackTimeRemaining) best = e;
   }
@@ -440,9 +457,9 @@ function counterCandidate(p: Player): Enemy | null {
 }
 
 function enemyWindingUpNear(p: Player) {
-  const list = game.enemies?.list;
-  if (!list) return false;
-  return list.some((e) => e.alive && e.attacking && e.feet.distanceTo(p.position) < C.range + 1.5);
+  const near = (e: CounterThreat) => e.alive !== false && e.attacking && e.feet.distanceTo(p.position) < C.range + 1.5;
+  if (game.enemies?.list.some(near)) return true;
+  return counterThreatSources.some((src) => src().some(near));
 }
 
 function tryCounter(p: Player, _ctx: string, from: string): boolean {
@@ -456,7 +473,7 @@ function tryCounter(p: Player, _ctx: string, from: string): boolean {
 }
 
 function enterCounter(p: Player, data?: unknown) {
-  const e = data as Enemy;
+  const e = data as CounterThreat;
   s.counterTarget = e;
   s.counterStruck = false;
   p.invulnerable = true;
@@ -496,7 +513,7 @@ function updateCounter(p: Player, dt: number) {
     const d = Math.hypot(dx, dz);
     p.facing = Math.atan2(dx, dz);
     // close the gap so the strike connects
-    const gap = d - 1.3;
+    const gap = d - 0.8 - e.radius; // 1.3 for a grunt (r 0.5)
     const left = Math.max(0.05, C.strikeAt - t);
     const sp = gap > 0 ? Math.min(10, gap / left) : 0;
     p.velocity.x = (dx / (d || 1)) * sp;
@@ -510,7 +527,7 @@ function updateCounter(p: Player, dt: number) {
   if (!s.counterStruck && t >= C.strikeAt) {
     s.counterStruck = true;
     p.model.play('1H_Melee_Attack_Slice_Horizontal', { fade: 0.05, loop: false, speed: 1.7, startAt: 0.25, restart: true });
-    if (e && e.alive) {
+    if (e && e.alive !== false) {
       const dir = new Vector3(e.feet.x - p.position.x, 0, e.feet.z - p.position.z);
       if (dir.lengthSq() < 1e-4) dir.copy(p.forward);
       dir.normalize();

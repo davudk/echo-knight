@@ -27,10 +27,11 @@ Click the screen to start (locks the mouse). Press **Esc** to release it / pause
 | Light + Heavy together: Whirlwind | LMB+RMB / J+K | X+Y |
 | Block · Parry · Counter (depends on Defense Style) | F / U / mouse back button | LB / L1 |
 | Echo: tap = place / recall, hold = recall latest | E / L / mouse forward button | RB / R1 |
+| **Heal** (drink a flask) | C | D-pad ↓ |
 | Lock-on (no target = recenter camera) | R / MMB | R3 |
 | Recenter camera | Q | R3 |
 | **Loadout** (pauses) | Tab | Back / Select |
-| Pause | Esc | Start |
+| Pause (menu: Resume · Loadout · **Travel**) | Esc | Start |
 | Toggle help · FPS | H · F3 | — |
 | Mute · volume − / + | M · `-` / `=` | — |
 | Training: input history + last move · move list | T · F1 | — |
@@ -41,6 +42,18 @@ Press **Tab** (gamepad **Back**) to open the Loadout: every ability is an upgrad
 between, and changes apply instantly. Presets: **Base**, **Acrobat** (triple jump, wall-runs, slides, echo platforms),
 **Assassin** (shadow clones that fight with you, swap), **Brawler** (counters, rewind), **Everything**.
 Conflicting picks are greyed out with the reason (e.g. Echo Platform excludes Aerial Echo); "Switch anyway" resolves them.
+
+### Bosses, flasks, difficulty, travel
+
+- **Flasks**: C / D-pad ↓ drinks one (≈1.1 s at walking speed, heals 45 % at 0.6 s — a hit before that wastes it).
+  3 charges (Story 5, Souls 2), shown next to the HP bar; they refill when you respawn or rest at a boss's fog gate.
+- **Difficulty** (Loadout → Challenge): *Story* / *Normal* / *Souls* scales enemy and boss damage, boss wind-up and
+  punish windows, boss health and flask charges. Presets keep your difficulty.
+- **Travel** (pause menu): warp to the spawn arena, the town, the parkour gym or any boss arena.
+- **Bosses** (`src/boss/`, see [src/boss/README.md](src/boss/README.md)): fog gate → sealed arena, a big boss bar
+  with phase ticks and a poise meter, gold (parryable) / red (unblockable, grabs, shockwaves you jump) / cyan
+  (magic) telegraphs, poise breaks into a stagger with a riposte finisher, the fight resets at the gate when you die.
+  Dev: **Shift+B** or `game.bosses.spawnTest()` drops *The Gate Sentinel*, the framework's example mini-boss.
 
 ## Mechanics
 
@@ -117,6 +130,9 @@ plaza patrol loop for enemies.
 | `src/ui/HealthBars.ts` | Player HP bar, low-HP vignette, death screen, enemy health bars |
 | `src/ui/HUD.ts` | Control prompts (auto-switch by device), ability bar, combo pips, damage numbers |
 | `src/audio/*` | Procedural WebAudio sound effects (`sounds.ts` recipes, `audioFeature.ts` event → sound map). Dev: `sfx.debug = true` logs every sound with its event, `await sfxTest()` renders each recipe offline |
+| `src/boss/*` | Boss framework: `Boss` base, attack data + runner, hitboxes, decals, AI director, arena kit (fog gate, checkpoint, hazards), difficulty, example boss `sentinel/` — guide in `src/boss/README.md` |
+| `src/player/states/heal.ts` · `src/ui/FlaskHud.ts` | Flasks (heal state + HUD) |
+| `src/ui/BossBar.ts` · `src/ui/TravelMenu.ts` | Boss health bar / victory banner · pause-menu Travel list |
 | `src/ui/StyleMeter.ts` | Combo hit counter + D→S style rank (loadout `combat.styleMeter`) |
 | `src/ui/Training.ts` | Training overlay: input history, last-move readout, move list generated from `config/moveList.ts` |
 
@@ -126,3 +142,5 @@ In the browser console, `game` is exposed for debugging (e.g. `game.player.state
 
 Character: **KayKit Adventurers — Knight** by Kay Lousberg (www.kaylousberg.com), CC0. See `public/models/LICENSE-KayKit.txt`.
 Enemies reuse the same Knight model with dark-tinted armour and glowing eyes.
+Boss models: **KayKit Adventurers — Barbarian, Mage, Rogue, Rogue (Hooded)** by Kay Lousberg, CC0 (same pack and licence,
+`public/models/`), from https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.

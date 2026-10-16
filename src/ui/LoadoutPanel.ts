@@ -22,12 +22,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   movement: 'Movement',
   defense: 'Defense',
   combat: 'Combat',
+  challenge: 'Challenge',
 };
 const CATEGORY_GLYPHS: Record<string, string> = {
   echo: '◈',
   movement: '➶',
   defense: '⛨',
   combat: '⚔',
+  challenge: '☠',
 };
 
 const DEFS = new Map(Upgrades.map((d) => [d.id, d]));
@@ -100,7 +102,7 @@ function activeKit(): [UpgradeDef, LoadoutValue][] {
 function matchingPreset() {
   const snap = loadout.snapshot();
   return Presets.find((p) =>
-    Upgrades.every((d) => (p.values[d.id] ?? d.default) === snap[d.id]),
+    Upgrades.every((d) => d.category === 'challenge' || (p.values[d.id] ?? d.default) === snap[d.id]),
   );
 }
 
