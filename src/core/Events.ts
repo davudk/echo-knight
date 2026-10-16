@@ -28,6 +28,12 @@ export interface GameEvents {
   'player:blocked': { damage: number; position: Vector3 };
   'player:parry': { position: Vector3 };
   'player:perfect-dodge': { position: Vector3 };
+  /** counter style: an enemy's swing was reversed */
+  'player:counter': { position: Vector3 };
+  /** stamina ran out while blocking */
+  'player:guard-break': { position: Vector3 };
+  /** post-parry riposte connected (bonus damage dealt) */
+  'player:riposte': { position: Vector3; damage: number };
   'player:died': { position: Vector3 };
   'player:respawn': { position: Vector3 };
   'echo:placed': { position: Vector3; index: number };
