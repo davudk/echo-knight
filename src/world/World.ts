@@ -61,6 +61,8 @@ export interface HitInfo {
   source?: 'player' | 'echo';
   /** move id from the move list (for style meter / training log) */
   move?: string;
+  /** breaks an enemy's guard (kicks, charged heavies) */
+  guardBreak?: boolean;
 }
 
 /** Anything the player can hit. Enemies and dummies implement this. */
