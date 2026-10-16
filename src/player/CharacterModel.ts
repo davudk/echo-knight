@@ -121,6 +121,11 @@ export class CharacterModel {
     return this.actions.has(name);
   }
 
+  /** The AnimationClip named `name` (the echo mimic replays clips on its own mixer). */
+  getClip(name: string): AnimationClip | undefined {
+    return this.actions.get(name)?.getClip();
+  }
+
   clipDuration(name: string) {
     return this.actions.get(name)?.getClip().duration ?? 0;
   }
