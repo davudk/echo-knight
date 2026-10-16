@@ -2,6 +2,9 @@ import type { Game } from '../core/Game';
 import { installCombat } from '../player/states/combat';
 import { installLocomotion } from '../player/states/locomotion';
 import { echoFeature } from '../abilities/echoFeature';
+import { audioFeature } from '../audio/audioFeature';
+import { styleMeterFeature } from '../ui/StyleMeter';
+import { trainingFeature } from '../ui/Training';
 
 /**
  * A feature plugs into the game without the game knowing its internals.
@@ -33,4 +36,7 @@ const playerCore: Feature = {
 export const features: Feature[] = [
   playerCore,
   echoFeature,
+  audioFeature,
+  styleMeterFeature,
+  trainingFeature,
 ];
