@@ -10,7 +10,7 @@
  * `requires` / `excludes` reference other upgrades as `id` (toggle on / tier > first level)
  * or `id=value` (specific choice/tier value).
  */
-export type UpgradeCategory = 'echo' | 'movement' | 'defense' | 'combat';
+export type UpgradeCategory = 'echo' | 'movement' | 'defense' | 'combat' | 'challenge';
 
 interface BaseDef {
   id: string;
@@ -168,6 +168,18 @@ export const Upgrades: UpgradeDef[] = [
     id: 'combat.styleMeter', kind: 'toggle', category: 'combat', default: true,
     name: 'Style Meter',
     description: 'Combo counter and D→S style rank.',
+  },
+
+  // ---------------------------------------------------------------- Challenge (kept when a preset is applied)
+  {
+    id: 'challenge.difficulty', kind: 'choice', category: 'challenge', default: 'normal',
+    name: 'Difficulty',
+    description: 'Enemy and boss damage, boss telegraph / punish windows, boss health and flask charges.',
+    options: [
+      { id: 'story', name: 'Story', description: 'Half damage, longer wind-ups and punish windows, 5 flasks, bosses at 70% health.' },
+      { id: 'normal', name: 'Normal', description: 'The intended fight: 3 flasks.' },
+      { id: 'souls', name: 'Souls', description: '+35% damage, snappier bosses with shorter openings, 2 flasks, bosses at 115% health.' },
+    ],
   },
 ];
 

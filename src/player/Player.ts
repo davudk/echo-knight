@@ -71,6 +71,8 @@ export interface IncomingHit {
   knockback: number;
   heavy?: boolean;
   unblockable?: boolean;
+  /** false = a parry attempt only blocks (magic). undefined/true = parryable as before */
+  parryable?: boolean;
   /** attacker hooks for parry / counter reactions */
   attacker?: {
     position: Vector3;

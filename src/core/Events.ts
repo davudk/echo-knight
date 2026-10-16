@@ -62,6 +62,33 @@ export interface GameEvents {
   'enemy:blocked': { position: Vector3 };
   'enemy:staggered': { position: Vector3; duration: number; parried: boolean };
   'enemy:respawn': { position: Vector3 };
+  // Bosses (src/boss/*) — `id` is the boss id, payloads are plain data.
+  'boss:engage': { id: string; name: string; position: Vector3 };
+  /** a new phase started (0 = first); fired at the start of the transition beat */
+  'boss:phase': { id: string; phase: number; position: Vector3 };
+  /** poise broken / parry reaction; `riposte` = open to a finisher */
+  'boss:stagger': { id: string; position: Vector3; duration: number; cause: 'poise' | 'parry' | 'counter' | 'reflect' | 'custom'; riposte: boolean };
+  /** an attack step started winding up; `telegraph` = colour class, `windup` = seconds until it is active */
+  'boss:attack': { id: string; attackId: string; step: number; telegraph: 'parryable' | 'unblockable' | 'magic'; windup: number; position: Vector3 };
+  /** the boss took damage */
+  'boss:hit': { id: string; damage: number; position: Vector3; heavy: boolean; critical: boolean };
+  /** riposte / execution finisher landed */
+  'boss:riposte': { id: string; damage: number; position: Vector3 };
+  'boss:grab': { id: string; phase: 'catch' | 'throw' | 'escape'; position: Vector3 };
+  /** a boss projectile was parried back */
+  'boss:reflect': { id: string; position: Vector3 };
+  'boss:defeated': { id: string; name: string; position: Vector3 };
+  /** the fight was reset (player died / left) */
+  'boss:reset': { id: string };
+  /** arena kit: fog gate sealed / opened, music / ambience cues (audio subscribes) */
+  'arena:seal': { id: string; sealed: boolean; position: Vector3 };
+  'arena:music': { id: string; cue: 'fight' | 'phase' | 'victory' | 'stop'; phase?: number };
+  'arena:checkpoint': { id: string; position: Vector3 };
+  /** flasks (player/states/heal.ts) */
+  'player:heal-start': { position: Vector3; charges: number };
+  'player:heal': { position: Vector3; amount: number; charges: number };
+  'player:heal-empty': { position: Vector3 };
+  'player:grabbed': { position: Vector3 };
   'input:action': { action: string };
   'loadout:changed': { id: string; value: LoadoutValue };
   'ui:pause': { paused: boolean };

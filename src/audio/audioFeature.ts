@@ -55,6 +55,22 @@ const SoundMap: Record<string, (p: Payload, play: Play) => void> = {
   // Echo extras
   'echo:fizzle': (_p, play) => play('uiClick', { ui: true }),
   'echo:shockwave': (p, play) => play('echoShockwave', { pos: p.position }),
+  // Bosses
+  'boss:engage': (p, play) => play('bossRoar', { pos: p.position }),
+  'boss:phase': (p, play) => play('bossRoar', { pos: p.position, intensity: 1.2 }),
+  'boss:attack': (p, play) => play('bossTelegraph', { pos: p.position, variant: p.telegraph }),
+  'boss:hit': (p, play) => play('enemyHit', { pos: p.position, variant: p.heavy ? 'heavy' : '' }),
+  'boss:stagger': (p, play) => play(p.riposte ? 'bossStagger' : 'block', { pos: p.position }),
+  'boss:riposte': (p, play) => play('slam', { pos: p.position }),
+  'boss:grab': (p, play) => play(p.phase === 'throw' ? 'slam' : p.phase === 'catch' ? 'grab' : 'roll', { pos: p.position }),
+  'boss:reflect': (p, play) => play('parry', { pos: p.position }),
+  'boss:defeated': (p, play) => play('bossDefeated', { pos: p.position }),
+  'arena:seal': (p, play) => play('fogGate', { pos: p.position }),
+  'arena:music': (p, play) => (p.cue === 'victory' ? play('rankUp', { ui: true, intensity: 1 }) : undefined),
+  'player:heal': (p, play) => play('flask', { pos: p.position }),
+  'player:heal-start': (p, play) => play('grab', { pos: p.position }),
+  'player:heal-empty': (_p, play) => play('uiClick', { ui: true }),
+  'player:grabbed': (p, play) => play('damaged', { pos: p.position }),
 };
 
 /** Style-meter rank-ups etc. can trigger sounds directly. */

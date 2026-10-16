@@ -110,6 +110,7 @@ export class HUD {
         ['Heavy (hold)', L.heavy],
         ['Block · Parry', L.block],
         ['Lock-on', L.lockOn],
+        ['Heal (flask)', L.heal],
       ]],
       ['Echo', [
         ['Place · Recall', L.echo],

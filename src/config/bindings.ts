@@ -8,7 +8,7 @@
  */
 export type Action =
   | 'jump' | 'dodge' | 'attack' | 'heavy' | 'block' | 'echo'
-  | 'sprint' | 'lockOn' | 'recenter' | 'loadout' | 'pause';
+  | 'sprint' | 'lockOn' | 'recenter' | 'loadout' | 'pause' | 'heal';
 
 export interface ActionBinding {
   keys: string[]; // KeyboardEvent.code
@@ -28,6 +28,7 @@ export const Bindings: Record<Action, ActionBinding> = {
   recenter: { keys: ['KeyQ'], mouse: [], pad: [] },
   loadout: { keys: ['Tab'], mouse: [], pad: [8] },
   pause: { keys: ['Escape'], mouse: [], pad: [9] },
+  heal: { keys: ['KeyC'], mouse: [], pad: [13] },
 };
 
 export const MoveKeys = {
@@ -54,6 +55,7 @@ export const PromptLabels: Record<'kbm' | 'pad', Record<string, string>> = {
     lockOn: 'R / MMB',
     recenter: 'Q',
     loadout: 'Tab',
+    heal: 'C',
   },
   pad: {
     move: 'L-Stick',
@@ -68,5 +70,6 @@ export const PromptLabels: Record<'kbm' | 'pad', Record<string, string>> = {
     lockOn: 'R3',
     recenter: 'R3',
     loadout: 'Back',
+    heal: 'D-pad ↓',
   },
 };

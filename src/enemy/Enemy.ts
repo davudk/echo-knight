@@ -9,6 +9,7 @@ import {
   SphereGeometry,
   Vector3,
 } from 'three';
+import { Difficulty } from '../boss/difficulty';
 import { events } from '../core/Events';
 import type { Game } from '../core/Game';
 import { angleDelta, clamp, dampAngle } from '../core/math';
@@ -675,7 +676,7 @@ export class Enemy implements Hittable {
     if (d < 1e-3) dir.copy(f);
     dir.normalize();
     const result: HitResult = p.receiveHit({
-      damage: this.atk.damage, dir, knockback: this.atk.knockback, heavy: this.atk.heavy, attacker: this,
+      damage: Difficulty.scaleDamage(this.atk.damage), dir, knockback: this.atk.knockback, heavy: this.atk.heavy, attacker: this,
     });
     switch (result) {
       case 'hit':
