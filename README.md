@@ -41,6 +41,14 @@ Click the screen to start (locks the mouse). Press **Esc** to release it / pause
 
 The ruined pillars and the stepping stones to the south-west are climbable; try jump → air dash → echo chains.
 
+**Ruined town** (north, ~60 m up the road from the arena, `src/world/Town.ts`): a gatehouse with battlements faces the arena,
+curtain walls (some broken into steps), a keep wall with a timber scaffold and a wall walk, a 10 m watchtower whose corbelled
+ledges spiral to the top (each 1.6 m apart: a plain jump reaches the next), houses with walkable stepped gable roofs or flat roofs
+(one with an outside stair), an open walk-in ruin, market stalls, crates and low walls. A cobbled plaza (r ≈ 10 m) in the middle
+is kept clear for fights. Heights go 1.0–1.2 m (vault), 2.2–3 m (ledge grab), 4.2–6.2 m (double jump / wall-run / echo), 7.5–10.4 m.
+Every solid piece is a box collider matching its mesh; tall faces are tagged `wall`, tower ledges `ledge`. `TownSpots` exports a
+plaza patrol loop for enemies.
+
 ## Code map
 
 | Path | What |
@@ -53,7 +61,7 @@ The ruined pillars and the stepping stones to the south-west are climbable; try 
 | `src/player/CharacterModel.ts` | glTF loading, gear hiding, root-motion stripping, animation crossfades |
 | `src/abilities/EchoRecall.ts` | The echo / shadow-recall ability |
 | `src/fx/*` | Hologram shader, ghosts/afterimages, particles, sword trail, shockwaves |
-| `src/world/*` | Terrain heightfield, props & colliders, training dummies, sky/lighting |
+| `src/world/*` | Terrain heightfield, props & colliders, training dummies, sky/lighting, ruined town (`Town.ts`) |
 | `src/ui/HUD.ts` | Control prompts (auto-switch by device), ability bar, combo pips, damage numbers |
 | `src/audio/*` | Procedural WebAudio sound effects (`sounds.ts` recipes, `audioFeature.ts` event → sound map). Dev: `sfx.debug = true` logs every sound with its event, `await sfxTest()` renders each recipe offline |
 | `src/ui/StyleMeter.ts` | Combo hit counter + D→S style rank (loadout `combat.styleMeter`) |
