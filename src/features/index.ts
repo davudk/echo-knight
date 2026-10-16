@@ -1,6 +1,8 @@
 import type { Game } from '../core/Game';
 import { installCombat } from '../player/states/combat';
 import { installLocomotion } from '../player/states/locomotion';
+import { installParkour } from '../player/states/parkour';
+import { gymFeature } from '../world/Gym';
 import { echoFeature } from '../abilities/echoFeature';
 import { audioFeature } from '../audio/audioFeature';
 import { styleMeterFeature } from '../ui/StyleMeter';
@@ -30,6 +32,7 @@ const playerCore: Feature = {
   install(game) {
     installLocomotion(game.player);
     installCombat(game.player);
+    installParkour(game.player);
   },
 };
 
@@ -47,4 +50,5 @@ export const features: Feature[] = [
   townFeature,
   enemyFeature,
   offenseFeature,
+  gymFeature,
 ];

@@ -11,6 +11,15 @@ export interface GameEvents {
   'player:dodge': { position: Vector3; backstep: boolean };
   'player:airdash': { position: Vector3; dir: Vector3 };
   'player:footstep': { position: Vector3; sprint: boolean };
+  // Movement kit (movement stream)
+  'player:slide': { position: Vector3; speed: number };
+  'player:longjump': { position: Vector3; speed: number };
+  'player:wallrun': { position: Vector3; normal: Vector3; side: 'left' | 'right' };
+  'player:wallrun-end': { position: Vector3; reason: 'jump' | 'time' | 'release' | 'edge' | 'land' | 'other' };
+  'player:walljump': { position: Vector3; dir: Vector3 };
+  'player:ledge': { position: Vector3; action: 'grab' | 'vault' | 'climb' | 'drop' | 'jump' };
+  'gym:start': { position: Vector3 };
+  'gym:finish': { time: number; best: number };
   /** An attack started. Carries everything needed to replay it (echo mimic, training log). */
   'player:attack': {
     move: string;

@@ -162,6 +162,81 @@ export const Tuning = {
     hitstop: 0.065,
     hitstopHeavy: 0.12,
   },
+
+  // ---------------------------------------------------------------- movement kit (movement stream)
+  movement: {
+    /** collision body height (World.resolveCollisions); slides temporarily lower it */
+    bodyHeight: 1.6,
+    /** air-jump velocity multipliers (2nd, 3rd jump) */
+    airJumpScale: [0.9, 0.82],
+    /** front-flip duration on air jumps */
+    airJumpFlip: 0.42,
+    /** eight-way air dash: vertical angle when holding jump (up) / sprint (down) */
+    dashUpAngle: (35 * Math.PI) / 180,
+    dashDownAngle: (35 * Math.PI) / 180,
+
+    slide: {
+      /** minimum horizontal speed to slide instead of roll (sprinting always qualifies) */
+      minSpeed: 7.0,
+      startSpeed: 12.5,
+      duration: 0.6,
+      /** speed decay per second (exponential) */
+      friction: 1.1,
+      /** extra acceleration along a downhill slope (m/s² per unit of slope) */
+      slopeAccel: 26,
+      /** keeps sliding downhill while above this speed, up to maxDuration */
+      keepSpeed: 7,
+      maxDuration: 1.6,
+      /** forced crawl speed while something is overhead */
+      ceilingSpeed: 4.5,
+      bodyHeight: 0.8,
+      steer: 2.5,
+      /** jumps / attacks may cancel from here */
+      cancelAt: 0.12,
+    },
+
+    longJump: {
+      speed: 14,
+      velocity: 9.5,
+    },
+
+    wallRun: {
+      minSpeed: 4.0,
+      minAlong: 3.0,
+      speed: 8.5,
+      maxTime: 1.2,
+      /** gravity scale ramps from start to end over the run */
+      gravity: [0.12, 0.7] as [number, number],
+      startVy: 2.2,
+      minWallHeight: 2.5,
+      /** probe distance from the body surface */
+      reach: 0.35,
+      kickOut: 6.5,
+      kickUp: 10,
+      kickAlong: 0.55,
+      /** same wall can't be re-used for this long (seconds of airtime) */
+      wallCooldown: 0.55,
+      releaseGrace: 0.15,
+    },
+
+    ledge: {
+      /** ledge top relative to feet: [min, max] */
+      reach: [0.55, 2.45] as [number, number],
+      /** below this a grab becomes a quick vault */
+      vaultBelow: 1.15,
+      /** feet below the ledge top while hanging */
+      hangDrop: 1.65,
+      probe: 0.35,
+      climbTime: 0.42,
+      vaultTime: 0.28,
+      shimmySpeed: 1.6,
+      dropCooldown: 0.4,
+      kickOut: 5.5,
+      kickUp: 9.5,
+      /** max upward speed at which a grab can happen */
+      maxVy: 2.5,
+    },
+  },
 };
 
 // ====================================================================== combat (offense stream)
