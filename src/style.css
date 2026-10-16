@@ -43,19 +43,27 @@ html, body {
 
 /* ---------- control prompts ---------- */
 .controls {
-  position: absolute; left: 18px; bottom: 18px; padding: 12px 14px;
+  position: absolute; left: 18px; bottom: 18px; padding: 10px 12px;
   background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
-  font-family: ui-sans-serif, system-ui, sans-serif; font-size: 12px; line-height: 1.75; color: var(--ink-dim);
+  font-family: ui-sans-serif, system-ui, sans-serif; font-size: 11.5px; line-height: 1.65; color: var(--ink-dim);
   transition: opacity 0.3s;
 }
-.controls.collapsed { opacity: 0.25; }
-.controls .row { display: flex; justify-content: space-between; gap: 18px; }
+.controls .sections { display: grid; grid-template-columns: auto auto; gap: 4px 16px; }
+.controls .section { min-width: 150px; }
+.controls .sec-title { color: var(--accent); font-size: 9.5px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85; margin-top: 2px; }
+.controls.collapsed { opacity: 0.45; }
+.controls.collapsed .sections { display: none; }
+.controls .row { display: flex; justify-content: space-between; gap: 12px; }
 .controls kbd {
-  display: inline-block; min-width: 20px; padding: 0 6px; text-align: center;
+  display: inline-block; min-width: 20px; padding: 0 5px; text-align: center; white-space: nowrap;
   border: 1px solid rgba(255,255,255,0.25); border-radius: 4px; background: rgba(255,255,255,0.06);
-  color: var(--ink); font: 11px/18px ui-monospace, monospace;
+  color: var(--ink); font: 10.5px/17px ui-monospace, monospace;
 }
-.controls .title { color: var(--ink); letter-spacing: 0.15em; text-transform: uppercase; font-size: 11px; margin-bottom: 4px; }
+.controls .title { display: flex; justify-content: space-between; gap: 10px; color: var(--ink); letter-spacing: 0.15em; text-transform: uppercase; font-size: 10.5px; margin-bottom: 2px; }
+.controls .title .hint { font: 10px ui-monospace, monospace; color: var(--ink-dim); letter-spacing: 0; text-transform: none; }
+@media (max-width: 760px), (max-height: 520px) {
+  .controls .sections { display: none; }
+}
 
 /* ---------- ability bar ---------- */
 .abilities { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 14px; align-items: flex-end; }
