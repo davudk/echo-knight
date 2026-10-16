@@ -16,7 +16,9 @@
 @keyframes lo-fade { from { opacity: 0; } }
 
 .lo-panel {
-  position: relative; width: min(1120px, 100%); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px);
+  /* Fixed height so switching categories / hovering doesn't resize the panel; the cards scroll inside. */
+  position: relative; width: min(1120px, 100%);
+  height: min(760px, calc(100vh - 32px)); height: min(760px, calc(100dvh - 32px));
   display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto;
   background: linear-gradient(180deg, rgba(18, 19, 26, 0.96), rgba(10, 11, 16, 0.97));
   border: 1px solid var(--lo-line); border-radius: 4px;
@@ -240,8 +242,11 @@
 
 /* ---------- narrow layouts: stack columns, scroll the whole panel ---------- */
 @media (max-width: 900px) {
-  .lo-body { grid-template-columns: 150px minmax(0, 1fr); }
-  .lo-side { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--lo-line-soft); flex-direction: row; flex-wrap: wrap; }
+  .lo-body { grid-template-columns: 150px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .lo-side {
+    grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--lo-line-soft); flex-direction: row; flex-wrap: wrap;
+    height: 190px; /* fixed so the detail text doesn't push the cards around */
+  }
   .lo-side > * { flex: 1 1 240px; }
   .lo-detail { min-height: 0; }
   .lo-kit { border-top: 0; padding-top: 0; }
