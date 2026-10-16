@@ -39,6 +39,8 @@ const s = {
   // ledge
   ledgeN: new Vector3(),
   ledgeTop: 0,
+  /** the collider we hang from (moving platforms carry the hang / climb, see Player.platform) */
+  ledgeC: null as Collider | null,
   ledgeBlockUntil: -1,
   climbFrom: new Vector3(),
   climbTo: new Vector3(),
@@ -424,6 +426,8 @@ function enterHang(p: Player, data?: unknown) {
   const hit = data as WallHit;
   s.ledgeN.copy(hit.normal);
   s.ledgeTop = hit.top;
+  s.ledgeC = hit.collider;
+  p.attached = hit.collider;
   hangPosition(p, hit);
   p.velocity.set(0, 0, 0);
   p.facing = Math.atan2(-s.ledgeN.x, -s.ledgeN.z);
@@ -436,7 +440,15 @@ function enterHang(p: Player, data?: unknown) {
   events.emit('player:ledge', { position: p.position.clone(), action: 'grab' });
 }
 
+/** A moving ledge carried the player this frame (Player.applyCarry): re-anchor the stored ledge. */
+function followCarry(p: Player) {
+  if (p.carryYaw !== 0) s.ledgeN.applyAxisAngle(UP, p.carryYaw);
+  s.ledgeTop += p.carryDelta.y;
+}
+const UP = new Vector3(0, 1, 0);
+
 function updateHang(p: Player, dt: number) {
+  followCarry(p);
   p.gravityScale = 0;
   p.velocity.set(0, 0, 0);
   const t = p.stateTime;
@@ -505,6 +517,8 @@ function startClimb(p: Player) {
 function enterClimb(p: Player, data?: unknown) {
   const d = (data ?? {}) as { hit?: WallHit; vault?: boolean };
   s.vault = !!d.vault;
+  if (d.hit) s.ledgeC = d.hit.collider;
+  p.attached = s.ledgeC;
   if (d.hit) {
     s.ledgeN.copy(d.hit.normal);
     s.ledgeTop = d.hit.top;
@@ -525,6 +539,9 @@ function enterClimb(p: Player, data?: unknown) {
 }
 
 function updateClimb(p: Player) {
+  followCarry(p);
+  s.climbFrom.add(p.carryDelta);
+  s.climbTo.add(p.carryDelta);
   p.gravityScale = 0;
   p.velocity.set(0, 0, 0);
   const u = clamp(p.stateTime / s.climbTime, 0, 1);

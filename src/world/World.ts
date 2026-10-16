@@ -132,6 +132,20 @@ export class World {
     return g;
   }
 
+  /** The collider whose top `groundAt` would return at (x, z), or null for bare terrain (moving platforms). */
+  groundCollider(x: number, z: number, fromY = Infinity, step = 0.45): Collider | null {
+    let g = this.terrain.heightAt(x, z);
+    let best: Collider | null = null;
+    for (const c of this.colliders) {
+      if (c.top === Infinity || c.top <= g || c.top > fromY + step) continue;
+      if (this.contains2D(c, x, z)) {
+        g = c.top;
+        best = c;
+      }
+    }
+    return best;
+  }
+
   /** Push a circle out of any collider it overlaps at its current height. Fills `contacts`. */
   resolveCollisions(pos: Vector3, radius: number, step = 0.45, height = 1.6) {
     this.contacts.length = 0;
