@@ -152,3 +152,7 @@ Character: **KayKit Adventurers — Knight** by Kay Lousberg (www.kaylousberg.co
 Enemies reuse the same Knight model with dark-tinted armour and glowing eyes.
 Boss models: **KayKit Adventurers — Barbarian, Mage, Rogue, Rogue (Hooded)** by Kay Lousberg, CC0 (same pack and licence,
 `public/models/`), from https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0.
+
+## License
+
+Code: [MIT](LICENSE). Character models: KayKit Adventurers by Kay Lousberg, CC0 (`public/models/LICENSE-KayKit.txt`).
