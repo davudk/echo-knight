@@ -36,6 +36,11 @@ export interface GameEvents {
   'enemy:hit': { position: Vector3; damage: number; heavy: boolean };
   'enemy:died': { position: Vector3 };
   'enemy:attack': { position: Vector3 };
+  /** an enemy started winding up; `duration` = seconds until its hit frame */
+  'enemy:telegraph': { position: Vector3; duration: number };
+  'enemy:blocked': { position: Vector3 };
+  'enemy:staggered': { position: Vector3; duration: number; parried: boolean };
+  'enemy:respawn': { position: Vector3 };
   'input:action': { action: string };
   'loadout:changed': { id: string; value: LoadoutValue };
   'ui:pause': { paused: boolean };
