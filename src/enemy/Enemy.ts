@@ -306,6 +306,12 @@ export class Enemy implements Hittable {
       if (this.state !== 'air') this.go('air');
       return;
     }
+    if (this.state === 'air' && (info.launch ?? 0) < 0) {
+      // Spike (negative launch): slam straight down, no more float.
+      this.velocity.set(info.dir.x * info.knockback * 0.2, info.launch!, info.dir.z * info.knockback * 0.2);
+      this.floatTimer = 0;
+      return;
+    }
     if (this.state === 'air') {
       // Juggle: every hit keeps it floating a little longer.
       this.velocity.y = Math.max(this.velocity.y, T.juggleHitPop);

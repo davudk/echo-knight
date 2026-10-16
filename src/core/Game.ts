@@ -151,7 +151,8 @@ export class Game {
         onHit: (dm, info) => {
           const p = dm.position.clone();
           p.y += 0.2;
-          this.fx.hitSpark(p.clone().addScaledVector(info.dir, -0.3), info.dir.clone().negate().setY(0.3), info.heavy);
+          // Echo hits draw their own cyan sparks (abilities/EchoInstance.ts).
+          if (info.source !== 'echo') this.fx.hitSpark(p.clone().addScaledVector(info.dir, -0.3), info.dir.clone().negate().setY(0.3), info.heavy);
           this.hud.damageNumber(p.setY(p.y + 1.1), info.damage, info.heavy);
         },
       });

@@ -120,7 +120,9 @@ export class Ghost {
     else if (fade > 0) next.fadeIn(fade);
     next.play();
     this.action = next;
-    return Math.max(0, clip.duration - startAt) / Math.max(0.01, speed);
+    // Negative speed plays backwards from startAt toward 0 (e.g. the reversed-chop launcher).
+    const remaining = speed < 0 ? startAt : clip.duration - startAt;
+    return Math.max(0, remaining) / Math.max(0.01, Math.abs(speed));
   }
 
   updateAnimation(dt: number) {
