@@ -1,0 +1,88 @@
+:root {
+  --ink: #f3ecdc;
+  --ink-dim: rgba(243, 236, 220, 0.6);
+  --panel: rgba(12, 14, 20, 0.55);
+  --echo: #7fe3ff;
+  --accent: #f0b35a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #0b0d12;
+  color: var(--ink);
+  font-family: "Cinzel", "Trajan Pro", Georgia, serif;
+  user-select: none;
+}
+
+#app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+#loading {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  font-size: 18px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-dim);
+  background: #0b0d12; z-index: 20; transition: opacity 0.6s;
+}
+#loading.done { opacity: 0; pointer-events: none; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+
+/* ---------- start overlay ---------- */
+.overlay {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.25), rgba(0,0,0,0.7));
+  pointer-events: auto; cursor: pointer; transition: opacity 0.4s;
+}
+.overlay.hidden { opacity: 0; pointer-events: none; }
+.overlay h1 { margin: 0 0 6px; font-weight: 400; font-size: 44px; letter-spacing: 0.25em; text-transform: uppercase; }
+.overlay p { margin: 0; text-align: center; color: var(--ink-dim); letter-spacing: 0.12em; font-size: 14px; }
+.overlay .cta { margin-top: 26px; font-size: 13px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--accent); animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+
+/* ---------- control prompts ---------- */
+.controls {
+  position: absolute; left: 18px; bottom: 18px; padding: 12px 14px;
+  background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px;
+  font-family: ui-sans-serif, system-ui, sans-serif; font-size: 12px; line-height: 1.75; color: var(--ink-dim);
+  transition: opacity 0.3s;
+}
+.controls.collapsed { opacity: 0.25; }
+.controls .row { display: flex; justify-content: space-between; gap: 18px; }
+.controls kbd {
+  display: inline-block; min-width: 20px; padding: 0 6px; text-align: center;
+  border: 1px solid rgba(255,255,255,0.25); border-radius: 4px; background: rgba(255,255,255,0.06);
+  color: var(--ink); font: 11px/18px ui-monospace, monospace;
+}
+.controls .title { color: var(--ink); letter-spacing: 0.15em; text-transform: uppercase; font-size: 11px; margin-bottom: 4px; }
+
+/* ---------- ability bar ---------- */
+.abilities { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 14px; align-items: flex-end; }
+.ability { position: relative; width: 56px; height: 56px; }
+.ability svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.ability .bg { fill: rgba(10,12,18,0.6); stroke: rgba(255,255,255,0.12); stroke-width: 2; }
+.ability .arc { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke 0.2s; }
+.ability .label { position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
+.ability .key { position: absolute; left: 50%; top: -14px; transform: translateX(-50%); font: 10px ui-monospace, monospace; color: var(--ink-dim); white-space: nowrap; }
+.ability.ready .arc { stroke: var(--ink); }
+.ability.echo .arc { stroke: var(--echo); }
+.ability.cool .arc { stroke: rgba(255,255,255,0.3); }
+
+.pips { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.pip { width: 10px; height: 10px; transform: rotate(45deg); border: 1px solid var(--ink-dim); transition: background 0.1s, box-shadow 0.1s; }
+.pip.on { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+/* ---------- misc ---------- */
+.fps { position: absolute; right: 12px; top: 10px; font: 11px ui-monospace, monospace; color: var(--ink-dim); }
+.dmg {
+  position: absolute; font-family: Georgia, serif; font-weight: bold; font-size: 20px; color: #ffe2a8;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 2px 0 #4a2a00; transform: translate(-50%, -50%); white-space: nowrap;
+}
+.dmg.big { font-size: 28px; color: #ffcf6e; }
+.toast {
+  position: absolute; left: 50%; top: 18%; transform: translateX(-50%);
+  font-size: 13px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--echo);
+  text-shadow: 0 0 12px rgba(127, 227, 255, 0.7); opacity: 0; transition: opacity 0.25s;
+}
+.toast.show { opacity: 1; }
