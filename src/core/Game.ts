@@ -55,6 +55,8 @@ export class Game {
   /** why the game is paused: start/pause overlay, or a menu (loadout panel) */
   pauseReason: 'overlay' | 'menu' | null = 'overlay';
   private frozen = false;
+  /** pause when the mouse lock is lost (Esc). Disabled by the dev harness for scripted tests. */
+  pauseOnUnlock = true;
 
   get paused() {
     return this.pauseReason !== null;
@@ -140,7 +142,13 @@ export class Game {
     this.pauseReason = reason;
     this.hud.setOverlay(reason === 'overlay', true);
     if (reason === 'menu' && document.pointerLockElement) document.exitPointerLock();
-    if (reason === null && this.input.lastDevice === 'kbm') this.input.requestPointerLock();
+    if (reason === null && this.input.lastDevice === 'kbm' && this.pauseOnUnlock) {
+      this.input.requestPointerLock();
+      // Browsers can refuse a re-lock that wasn't triggered by a click (e.g. closing a menu with Tab).
+      setTimeout(() => {
+        if (!this.paused && !document.pointerLockElement) this.hud.flash('click to capture the mouse', 2);
+      }, 300);
+    }
     if (was !== reason) events.emit('ui:pause', { paused: reason !== null });
   }
 
@@ -178,7 +186,7 @@ export class Game {
       if (!this.paused) this.input.requestPointerLock();
     });
     document.addEventListener('pointerlockchange', () => {
-      if (!document.pointerLockElement && !this.paused && this.input.lastDevice === 'kbm') {
+      if (this.pauseOnUnlock && !document.pointerLockElement && !this.paused && this.input.lastDevice === 'kbm') {
         this.setPaused('overlay');
       }
     });

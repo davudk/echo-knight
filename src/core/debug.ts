@@ -27,6 +27,7 @@ export function installDebug(game: Game) {
       game.setFrozen(v);
     },
     start() {
+      game.pauseOnUnlock = false; // scripted tests run without a mouse lock
       game.setPaused(null);
       game.pauseReason = null;
     },
