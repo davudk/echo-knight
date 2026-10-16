@@ -31,7 +31,16 @@ export const Regions = {
   arena: { x: 0, z: 0, radius: 16 },
   town: { x: 0, z: -62, radius: 30 },
   gym: { x: 62, z: 0, radius: 24 },
+  // Boss arenas (phase 3)
+  warden: { x: -64, z: -58, radius: 20 },
+  colossus: { x: -60, z: 18, radius: 24 },
+  twins: { x: 0, z: 66, radius: 18 },
+  hunter: { x: 60, z: 60, radius: 16 },
+  stormcaller: { x: 60, z: -60, radius: 20 },
 };
+
+/** Regions that are built on (props keep out, terrain flattened). */
+export const BuildRegions = ['town', 'gym', 'warden', 'colossus', 'twins', 'hunter', 'stormcaller'] as const;
 
 /**
  * Low-poly heightfield. Heights are generated once into a grid; `heightAt` interpolates

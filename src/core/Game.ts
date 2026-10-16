@@ -25,7 +25,7 @@ import { HUD } from '../ui/HUD';
 import { Dummy } from '../world/Dummy';
 import { buildProps } from '../world/Props';
 import { Sky } from '../world/Sky';
-import { Regions, Terrain } from '../world/Terrain';
+import { BuildRegions, Regions, Terrain } from '../world/Terrain';
 import { World } from '../world/World';
 import { Input } from './Input';
 
@@ -81,10 +81,10 @@ export class Game {
       size: 240,
       segments: 160,
       seed: 1337,
-      flats: [
-        { x: Regions.town.x, z: Regions.town.z, radius: Regions.town.radius, blend: 14 },
-        { x: Regions.gym.x, z: Regions.gym.z, radius: Regions.gym.radius, blend: 12 },
-      ],
+      flats: BuildRegions.map((k) => {
+        const r = Regions[k];
+        return { x: r.x, z: r.z, radius: r.radius, blend: k === 'town' ? 14 : 12 };
+      }),
     });
     this.scene.add(terrain.mesh);
     this.world = new World(this.scene, terrain);

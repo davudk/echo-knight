@@ -106,3 +106,37 @@ Goal: a demo of "same character, different kits". Every ability is an *upgrade* 
 
 ## Not in this phase
 Grapple, blink, thrown echo, time-trial ghost replays, touch controls, rebinding/settings sliders, physics engine.
+
+---
+
+# Phase 3 — Bosses
+
+Goal: genuinely hard, fair, Souls-style bosses that test the player's kit (parry/counter/perfect dodge,
+mobility, echo). Every boss shares one framework so new bosses are mostly data + a few special mechanics.
+
+## Fairness rules (all bosses)
+1. Every attack telegraphs, with a distinct wind-up per attack, a sound cue and a colour:
+   **gold = parryable**, **red = unblockable / grab**, **cyan = echo / magic**.
+2. No hits that can't be avoided: the difficulty is timing and spacing, never randomness.
+3. Punish windows (~1–1.5 s) after big attacks.
+4. Poise / stagger meter: when it breaks, the boss is staggered and open to a riposte finisher.
+5. Mixups, not randomness: delayed hits, variable combo lengths, no identical combo three times running.
+6. Fast retry: fog gate, respawn checkpoint at the gate, the boss resets on player death, flasks refill.
+
+## Framework (wave 1, one agent): `src/boss/`
+Boss base (HP, phases by HP threshold with transition beats, poise), attack data + runner
+(windup / active / recovery, telegraph colour, parryable / unblockable / grab), hitbox shapes
+(cone, sweep arc over time, line / laser, circle, jumpable shockwave ring, grab volume, projectiles),
+AI director (weighted by distance / angle / cooldown / phase, no triple repeats, combo strings with delays),
+boss HUD (big bottom bar, name, phase ticks, stagger meter), arena kit (fog gate, checkpoint, reset,
+hazard zones), player flasks (limited, punishable heal), difficulty (Story / Normal / Souls) in the loadout,
+and a "Travel" menu to warp to each arena for demos.
+
+## Bosses (wave 2, parallel agents) and arenas (`Regions` in world/Terrain.ts)
+| Boss | Arena | Signature |
+|---|---|---|
+| **The Hollow Warden** | Warden's Keep courtyard (-64, -58) | Dark mirror of the player: 3 phases + desperation; echo ambush / mimic / swap, flooding floor forcing high ground, air pursuit, echo storm, execution finisher |
+| **The Bell Colossus** | West ruins (-60, 18) | Giant; climb its body / weapon to glowing weak points, shockwaves that shake you off |
+| **The Twin Wardens** | South arena (0, 66) | Duelist pair (aggressor + support), kill order matters, survivor enrages and inherits moves |
+| **The Hunter** | South-east shrine (60, 60) | Fast Sekiro-style duelist, posture system, few telegraphs, deflect-focused |
+| **The Stormcaller** | North-east plateau (60, -60) | Teleporting caster, projectile patterns, gap-closing, parry reflects projectiles, arena event phase |

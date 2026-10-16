@@ -16,7 +16,7 @@ import {
   BoxGeometry,
 } from 'three';
 import { rng } from '../core/math';
-import { Regions } from './Terrain';
+import { BuildRegions, Regions } from './Terrain';
 import type { World } from './World';
 
 const stoneMat = new MeshStandardMaterial({ color: '#8a8378', roughness: 0.9, flatShading: true });
@@ -27,7 +27,10 @@ const leafMat2 = new MeshStandardMaterial({ color: '#56693a', roughness: 0.9, fl
 
 /** Keep scattered props out of the building areas. */
 function inBuildArea(x: number, z: number, pad = 4) {
-  for (const r of [Regions.town, Regions.gym]) if (Math.hypot(x - r.x, z - r.z) < r.radius + pad) return true;
+  for (const k of BuildRegions) {
+    const r = Regions[k];
+    if (Math.hypot(x - r.x, z - r.z) < r.radius + pad) return true;
+  }
   return false;
 }
 
