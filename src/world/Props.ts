@@ -16,6 +16,7 @@ import {
   BoxGeometry,
 } from 'three';
 import { rng } from '../core/math';
+import { Regions } from './Terrain';
 import type { World } from './World';
 
 const stoneMat = new MeshStandardMaterial({ color: '#8a8378', roughness: 0.9, flatShading: true });
@@ -23,6 +24,12 @@ const stoneDarkMat = new MeshStandardMaterial({ color: '#6c665e', roughness: 0.9
 const barkMat = new MeshStandardMaterial({ color: '#4a3526', roughness: 1, flatShading: true });
 const leafMat = new MeshStandardMaterial({ color: '#3f5a32', roughness: 0.9, flatShading: true });
 const leafMat2 = new MeshStandardMaterial({ color: '#56693a', roughness: 0.9, flatShading: true });
+
+/** Keep scattered props out of the building areas. */
+function inBuildArea(x: number, z: number, pad = 4) {
+  for (const r of [Regions.town, Regions.gym]) if (Math.hypot(x - r.x, z - r.z) < r.radius + pad) return true;
+  return false;
+}
 
 function shadow<T extends Object3D>(o: T, cast = true, receive = true): T {
   o.traverse((c) => {
@@ -103,6 +110,7 @@ export function buildProps(world: World, seed = 7) {
     const x = Math.cos(a) * d;
     const z = Math.sin(a) * d;
     const s = 0.5 + Math.pow(rand(), 2.5) * 3.2;
+    if (inBuildArea(x, z)) continue;
     const geo = jitterGeometry(new DodecahedronGeometry(1, 0), 0.35, rand);
     const rock = shadow(new Mesh(geo, rand() > 0.5 ? stoneMat : stoneDarkMat));
     rock.scale.set(s * (0.8 + rand() * 0.6), s * (0.5 + rand() * 0.5), s * (0.8 + rand() * 0.6));
@@ -122,7 +130,7 @@ export function buildProps(world: World, seed = 7) {
     const x = Math.cos(a) * d;
     const z = Math.sin(a) * d;
     const y = terrain.heightAt(x, z);
-    if (terrain.normalAt(x, z).y < 0.85) continue;
+    if (terrain.normalAt(x, z).y < 0.85 || inBuildArea(x, z)) continue;
     const tree = makeTree(rand);
     tree.position.set(x, y, z);
     tree.rotation.y = rand() * Math.PI * 2;
@@ -203,7 +211,7 @@ function addGrass(root: Group, world: World, rand: () => number) {
   for (let i = 0; i < count * 3 && placed < count; i++) {
     const x = (rand() * 2 - 1) * world.bounds;
     const z = (rand() * 2 - 1) * world.bounds;
-    if (Math.hypot(x, z) < 11) continue;
+    if (Math.hypot(x, z) < 11 || inBuildArea(x, z, 0)) continue;
     const n = world.terrain.normalAt(x, z);
     if (n.y < 0.9) continue;
     p.set(x, world.terrain.heightAt(x, z) - 0.02, z);

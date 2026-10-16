@@ -8,11 +8,30 @@ import {
 } from 'three';
 import { createNoise2D, smoothstep, clamp } from '../core/math';
 
+export interface FlatZone {
+  x: number;
+  z: number;
+  /** fully flat inside this radius */
+  radius: number;
+  /** blend distance outside the radius */
+  blend: number;
+  /** target height; defaults to the natural height at the centre */
+  height?: number;
+}
+
 export interface TerrainOptions {
   size: number;
   segments: number;
   seed: number;
+  flats?: FlatZone[];
 }
+
+/** Named build areas (see PLAN.md "Map regions"). */
+export const Regions = {
+  arena: { x: 0, z: 0, radius: 16 },
+  town: { x: 0, z: -62, radius: 30 },
+  gym: { x: 62, z: 0, radius: 24 },
+};
 
 /**
  * Low-poly heightfield. Heights are generated once into a grid; `heightAt` interpolates
@@ -26,7 +45,7 @@ export class Terrain {
   private readonly cell: number;
   private readonly heights: Float32Array;
 
-  constructor({ size, segments, seed }: TerrainOptions) {
+  constructor({ size, segments, seed, flats = [] }: TerrainOptions) {
     this.size = size;
     this.half = size / 2;
     this.n = segments;
@@ -37,11 +56,17 @@ export class Terrain {
     const detail = createNoise2D(seed + 1);
     const warp = createNoise2D(seed + 2);
 
+    const zones = flats.map((f) => ({ ...f, h: f.height ?? this.generate(f.x, f.z, base, detail, warp) }));
     for (let j = 0; j <= segments; j++) {
       for (let i = 0; i <= segments; i++) {
         const x = -this.half + i * this.cell;
         const z = -this.half + j * this.cell;
-        this.heights[j * (segments + 1) + i] = this.generate(x, z, base, detail, warp);
+        let h = this.generate(x, z, base, detail, warp);
+        for (const f of zones) {
+          const k = 1 - smoothstep(f.radius, f.radius + f.blend, Math.hypot(x - f.x, z - f.z));
+          h += (f.h - h) * k;
+        }
+        this.heights[j * (segments + 1) + i] = h;
       }
     }
 

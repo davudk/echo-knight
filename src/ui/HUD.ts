@@ -64,6 +64,21 @@ export class HUD {
     this.echo = { el: echoEl, arc: echoEl.querySelector('.arc')!, label: echoEl.querySelector('.label')!, key: echoEl.querySelector('.key')! };
   }
 
+  /** Mount a feature's HUD widget (absolute-positioned element). */
+  mount(el: HTMLElement): HTMLElement {
+    this.root.appendChild(el);
+    return el;
+  }
+
+  /** Inject a feature's CSS once (keeps styles next to the widget code). */
+  static addStyles(id: string, css: string) {
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+
   get overlayVisible() {
     return !this.overlay.classList.contains('hidden');
   }

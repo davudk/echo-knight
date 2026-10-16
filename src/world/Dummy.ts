@@ -19,6 +19,8 @@ export class Dummy implements Hittable {
   readonly root = new Group();
   readonly position = new Vector3();
   readonly radius = 0.55;
+  readonly lockable = true;
+  alive = true;
   private readonly body = new Group();
   private readonly mats: MeshStandardMaterial[] = [];
   private tilt = new Vector3(); // x/z = tilt angles

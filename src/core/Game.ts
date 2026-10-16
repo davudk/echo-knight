@@ -12,7 +12,10 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { EchoRecall } from '../abilities/EchoRecall';
+import type { EchoRecall } from '../abilities/EchoRecall';
+import { features, type Feature } from '../features';
+import { events } from './Events';
+import { installDebug } from './debug';
 import { ThirdPersonCamera } from '../camera/ThirdPersonCamera';
 import { Tuning } from '../config/tuning';
 import { Fx } from '../fx/Fx';
@@ -22,7 +25,7 @@ import { HUD } from '../ui/HUD';
 import { Dummy } from '../world/Dummy';
 import { buildProps } from '../world/Props';
 import { Sky } from '../world/Sky';
-import { Terrain } from '../world/Terrain';
+import { Regions, Terrain } from '../world/Terrain';
 import { World } from '../world/World';
 import { Input } from './Input';
 
@@ -40,13 +43,22 @@ export class Game {
   readonly sky: Sky;
   player!: Player;
   echo!: EchoRecall;
-  private readonly dummies: Dummy[] = [];
-  private composer!: EffectComposer;
+  readonly dummies: Dummy[] = [];
+  readonly features: Feature[] = [];
+  composer!: EffectComposer;
   private readonly clock = new Clock();
   private hitstopTimer = 0;
-  private time = 0;
-  private paused = true;
+  private slowmoTimer = 0;
+  private slowmoScale = 1;
+  /** seconds since start (real time, includes pauses) */
+  time = 0;
+  /** why the game is paused: start/pause overlay, or a menu (loadout panel) */
+  pauseReason: 'overlay' | 'menu' | null = 'overlay';
   private frozen = false;
+
+  get paused() {
+    return this.pauseReason !== null;
+  }
 
   constructor(container: HTMLElement, hudRoot: HTMLElement) {
     this.renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -63,7 +75,15 @@ export class Game {
     this.hud = new HUD(hudRoot);
     this.sky = new Sky(this.scene);
 
-    const terrain = new Terrain({ size: 240, segments: 160, seed: 1337 });
+    const terrain = new Terrain({
+      size: 240,
+      segments: 160,
+      seed: 1337,
+      flats: [
+        { x: Regions.town.x, z: Regions.town.z, radius: Regions.town.radius, blend: 14 },
+        { x: Regions.gym.x, z: Regions.gym.z, radius: Regions.gym.radius, blend: 12 },
+      ],
+    });
     this.scene.add(terrain.mesh);
     this.world = new World(this.scene, terrain);
     buildProps(this.world);
@@ -87,18 +107,41 @@ export class Game {
       fx: this.fx,
       cam: this.cam,
       input: this.input,
-      hitstop: (d) => (this.hitstopTimer = Math.max(this.hitstopTimer, d)),
+      hitstop: (d) => this.hitstop(d),
+      slowmo: (scale, d) => this.slowmo(scale, d),
     }, spawn);
     this.fx.initAfterimages(model.model);
-    this.echo = new EchoRecall(this.player, this.world, this.fx, this.cam, this.input, (e) => {
-      if (e === 'expired') this.hud.flash('echo faded', 0.9);
-    });
+    for (const f of features) {
+      f.install(this);
+      this.features.push(f);
+    }
     this.cam.snapTo(this.player.position);
     this.cam.update(this.player.position, 0);
 
     // Expose for debugging in the console.
     (window as unknown as { game: Game }).game = this;
+    if (import.meta.env.DEV) installDebug(this);
     this.renderer.setAnimationLoop(() => this.frame());
+  }
+
+  hitstop(duration: number) {
+    this.hitstopTimer = Math.max(this.hitstopTimer, duration);
+  }
+
+  /** Slow gameplay time to `scale` for `duration` real seconds (parry, perfect dodge). */
+  slowmo(scale: number, duration: number) {
+    this.slowmoScale = Math.min(this.slowmoScale, scale);
+    this.slowmoTimer = Math.max(this.slowmoTimer, duration);
+  }
+
+  /** Pause / resume. `menu` pauses without the click-to-play overlay and releases the mouse. */
+  setPaused(reason: 'overlay' | 'menu' | null) {
+    const was = this.pauseReason;
+    this.pauseReason = reason;
+    this.hud.setOverlay(reason === 'overlay', true);
+    if (reason === 'menu' && document.pointerLockElement) document.exitPointerLock();
+    if (reason === null && this.input.lastDevice === 'kbm') this.input.requestPointerLock();
+    if (was !== reason) events.emit('ui:pause', { paused: reason !== null });
   }
 
   private spawnDummies() {
@@ -128,28 +171,20 @@ export class Game {
   }
 
   private bindUi() {
-    const start = () => {
-      this.paused = false;
-      this.hud.setOverlay(false);
-      this.input.requestPointerLock();
-    };
+    const start = () => this.setPaused(null);
     this.hud.onOverlayClick(start);
     this.renderer.domElement.addEventListener('click', () => {
       if (!this.paused) this.input.requestPointerLock();
     });
     document.addEventListener('pointerlockchange', () => {
       if (!document.pointerLockElement && !this.paused && this.input.lastDevice === 'kbm') {
-        this.paused = true;
-        this.hud.setOverlay(true, true);
+        this.setPaused('overlay');
       }
     });
     this.hud.setDevice(this.input.lastDevice);
     this.input.onDevice((d) => {
       this.hud.setDevice(d);
-      if (d === 'pad' && this.paused) {
-        this.paused = false;
-        this.hud.setOverlay(false);
-      }
+      if (d === 'pad' && this.pauseReason === 'overlay') this.setPaused(null);
     });
     window.addEventListener('keydown', (e) => {
       if (e.code === 'KeyH') this.hud.toggleHelp();
@@ -186,6 +221,9 @@ export class Game {
     this.frozen = v;
   }
 
+  /** gameplay dt of the current frame (after hitstop / slow-mo) */
+  gameDt = 0;
+
   private frame(fixedDt?: number, render = true) {
     if (this.frozen && fixedDt === undefined) {
       this.clock.getDelta();
@@ -196,36 +234,39 @@ export class Game {
     this.input.update(this.time, rawDt);
 
     if (this.paused) {
-      if (this.input.pressed('pause') || this.input.pressed('jump') || this.input.pressed('attack')) {
-        if (this.input.lastDevice === 'pad') {
-          this.paused = false;
-          this.hud.setOverlay(false);
-        }
+      if (this.pauseReason === 'overlay' && this.input.lastDevice === 'pad' &&
+        (this.input.pressed('pause') || this.input.pressed('jump') || this.input.pressed('attack'))) {
+        this.setPaused(null);
       }
+      for (const f of this.features) f.pausedUpdate?.(rawDt, this);
       if (render) this.composer.render();
       return;
     }
-    if (this.input.lastDevice === 'pad' && this.input.pressed('pause')) {
-      this.paused = true;
-      this.hud.setOverlay(true, true);
-    }
+    if (this.input.lastDevice === 'pad' && this.input.pressed('pause')) this.setPaused('overlay');
 
-    // Hitstop: gameplay time nearly freezes, camera + particles keep running.
+    // Hitstop nearly freezes gameplay; slow-mo scales it. Camera + particles keep real time.
     let dt = rawDt;
+    if (this.slowmoTimer > 0) {
+      this.slowmoTimer -= rawDt;
+      dt *= this.slowmoScale;
+      if (this.slowmoTimer <= 0) this.slowmoScale = 1;
+    }
     if (this.hitstopTimer > 0) {
       this.hitstopTimer -= rawDt;
       dt = rawDt * 0.04;
     }
+    this.gameDt = dt;
 
     this.cam.addLook(this.input.look.x, this.input.look.y);
     if (this.input.pressed('recenter')) this.cam.recenter(this.player.facing);
 
     this.player.update(dt);
-    this.echo.update(dt);
+    for (const f of this.features) f.update?.(dt, this);
     for (const d of this.dummies) d.update(dt);
     this.fx.update(rawDt);
 
     this.cam.update(this.player.position, rawDt);
+    for (const f of this.features) f.lateUpdate?.(rawDt, this);
     this.sky.update(this.player.position, this.cam.camera.position);
 
     this.hud.update(rawDt, {

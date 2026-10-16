@@ -81,7 +81,7 @@ export class ThirdPersonCamera {
     const cp = Math.cos(this.pitch);
     const dir = this.tmp.set(-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp);
 
-    // Terrain collision: march along the boom and stop before ground / standable tops.
+    // Collision: march along the boom and stop before terrain / buildings.
     let maxD = T.distance;
     const steps = 14;
     for (let i = 1; i <= steps; i++) {
@@ -89,7 +89,7 @@ export class ThirdPersonCamera {
       const x = this.pivot.x + dir.x * d;
       const y = this.pivot.y + dir.y * d;
       const z = this.pivot.z + dir.z * d;
-      if (y < this.world.terrain.heightAt(x, z) + 0.35) {
+      if (this.world.pointBlocked(x, y, z, 0.3)) {
         maxD = Math.max(T.minDistance, ((i - 1) / steps) * T.distance);
         break;
       }

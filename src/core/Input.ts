@@ -1,6 +1,7 @@
 import { Vector2 } from 'three';
 import { Bindings, MoveKeys, PadAxes, type Action } from '../config/bindings';
 import { Tuning } from '../config/tuning';
+import { events } from './Events';
 
 export type Device = 'kbm' | 'pad';
 
@@ -29,6 +30,7 @@ export class Input {
   private heldNow = new Set<Action>();
   private heldPrev = new Set<Action>();
   private pressTime = new Map<Action, number>();
+  private downSince = new Map<Action, number>();
   private now = 0;
   private padConnected = false;
   private onDeviceChange: ((d: Device) => void) | null = null;
@@ -45,10 +47,14 @@ export class Input {
       this.mouseButtons.clear();
     });
     element.addEventListener('mousedown', (e) => {
+      if (e.button > 2) e.preventDefault(); // side buttons: don't navigate history
       this.mouseButtons.add(e.button);
       this.setDevice('kbm');
     });
-    window.addEventListener('mouseup', (e) => this.mouseButtons.delete(e.button));
+    window.addEventListener('mouseup', (e) => {
+      if (e.button > 2) e.preventDefault();
+      this.mouseButtons.delete(e.button);
+    });
     element.addEventListener('contextmenu', (e) => e.preventDefault());
     window.addEventListener('mousemove', (e) => {
       if (!this.pointerLocked) return;
@@ -106,7 +112,11 @@ export class Input {
       }
       if (down) {
         this.heldNow.add(a);
-        if (!this.heldPrev.has(a)) this.pressTime.set(a, now);
+        if (!this.heldPrev.has(a)) {
+          this.pressTime.set(a, now);
+          this.downSince.set(a, now);
+          events.emit('input:action', { action: a });
+        }
       }
     }
 
@@ -143,6 +153,11 @@ export class Input {
   }
   pressed(a: Action) {
     return this.heldNow.has(a) && !this.heldPrev.has(a);
+  }
+  /** Seconds the action has been continuously held (0 if not held). */
+  heldFor(a: Action): number {
+    if (!this.heldNow.has(a)) return 0;
+    return this.now - (this.downSince.get(a) ?? this.now);
   }
   released(a: Action) {
     return !this.heldNow.has(a) && this.heldPrev.has(a);
