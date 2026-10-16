@@ -10,7 +10,7 @@ export interface ComboStep {
   /** clip-time (s) to start from — skips slow wind-ups */
   clipStart: number;
   // All timings below are in *real* seconds from the start of the attack.
-  /** forward lunge window and distance */
+  /** movement window and distance, travelled along the stick direction (no stick input = attack in place) */
   lunge: { start: number; end: number; distance: number };
   /** when the hit is evaluated (ignored for slams: they hit on landing) */
   hitAt: number;
@@ -326,8 +326,8 @@ export interface MoveDef extends ComboStep {
   fallback?: string;
   /** holding heavy through the wind-up turns this move into a charge (combat.chargeHeavy) */
   chargeable?: boolean;
-  /** aerial move: gravity scale while active and the upward pop on enter */
-  air?: { gravity: number; pop: number };
+  /** aerial move: gravity scale while active (entering stops any rise — air attacks never gain height) */
+  air?: { gravity: number };
   /** override hitstop (seconds) / camera shake for this move */
   hitstop?: number;
   shake?: number;
@@ -425,7 +425,7 @@ export const CombatTuning = {
       hitAt: 0.15, trail: [0.06, 0.28], chainAt: 0.18, cancelAt: 0.24, moveCancelAt: 9, end: 0.42,
       hit: { range: 2.8, arcDeg: 160, damage: 10, knockback: 1 },
       effect: { launch: 4.5, stagger: 0.8 },
-      air: { gravity: 0.12, pop: 3.0 },
+      air: { gravity: 0.12 },
     },
     air2: {
       clip: '1H_Melee_Attack_Slice_Horizontal', speed: 1.75, clipStart: 0.15,
@@ -433,7 +433,7 @@ export const CombatTuning = {
       hitAt: 0.16, trail: [0.05, 0.3], chainAt: 0.2, cancelAt: 0.26, moveCancelAt: 9, end: 0.44,
       hit: { range: 2.8, arcDeg: 170, damage: 11, knockback: 1 },
       effect: { launch: 4.5, stagger: 0.8 },
-      air: { gravity: 0.12, pop: 2.5 },
+      air: { gravity: 0.12 },
     },
     airSpike: {
       clip: '1H_Melee_Attack_Chop', speed: 1.4, clipStart: 0.2, heavy: true,
@@ -441,7 +441,7 @@ export const CombatTuning = {
       hitAt: 0.22, trail: [0.08, 0.34], chainAt: 9, cancelAt: 0.34, moveCancelAt: 9, end: 0.5,
       hit: { range: 3.0, arcDeg: 150, damage: 18, knockback: 2 },
       effect: { launch: -18, stagger: 1.0 }, shake: 0.45,
-      air: { gravity: 0.15, pop: 2.0 },
+      air: { gravity: 0.15 },
       pose: 'dive',
     },
     // ---------------------------------------------------------------- charged heavy releases (tiers 1-3)

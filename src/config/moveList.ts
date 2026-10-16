@@ -15,7 +15,7 @@ export interface MoveEntry {
 }
 
 export const MoveList: MoveEntry[] = [
-  { id: 'light1', name: 'Rising Slash', input: 'L', description: 'Right-to-left slash with a forward lunge.' },
+  { id: 'light1', name: 'Rising Slash', input: 'L', description: 'Right-to-left slash; steps toward the stick (no stick = in place).' },
   { id: 'light2', name: 'Return Slash', input: 'L L', description: 'Left-to-right slash.' },
   { id: 'slam', name: 'Broken Wings', input: 'L L L', description: 'Leap and smash the ground (AoE).' },
   { id: 'plunge', name: 'Plunge', input: '(air) L', description: 'Dive and slam from the air (when no target is close).' },

@@ -257,7 +257,8 @@ function enterAttack(p: Player, data?: unknown) {
 
   if (m.air) {
     s.airCount++;
-    p.velocity.y = Math.max(m.air.pop, Math.min(p.velocity.y, 6));
+    // Hang in place: stop any rise (low air gravity would otherwise carry a jump much higher) but never add height.
+    p.velocity.y = Math.min(p.velocity.y, 0) * 0.2;
     p.velocity.x *= 0.4;
     p.velocity.z *= 0.4;
   }
@@ -311,17 +312,19 @@ function updateAttack(p: Player, dt: number) {
     p.fullJumpArc = true;
   }
 
+  // Lunge only along the stick: no movement input = attack in place; partial tilt = shorter step.
   const l = m.lunge;
-  if (l.end > l.start && t >= l.start && t <= l.end) {
+  const inLunge = l.end > l.start && t >= l.start && t <= l.end;
+  if (inLunge && p.moveMag > 0.1) {
     const sp = l.distance / Math.max(0.01, l.end - l.start);
-    const sc = sp * (m.leap ? 1 : 1.5 - (t - l.start) / (l.end - l.start));
-    p.velocity.x = fwd.x * sc;
-    p.velocity.z = fwd.z * sc;
+    const sc = sp * (m.leap ? 1 : 1.5 - (t - l.start) / (l.end - l.start)) * Math.min(1, p.moveMag);
+    p.velocity.x = p.moveDir.x * sc;
+    p.velocity.z = p.moveDir.z * sc;
   } else if (p.grounded) {
     const k = Math.exp(-14 * dt);
     p.velocity.x *= k;
     p.velocity.z *= k;
-  } else if (m.air) {
+  } else if (m.air || m.leap) {
     const k = Math.exp(-4 * dt);
     p.velocity.x *= k;
     p.velocity.z *= k;
@@ -386,8 +389,8 @@ function moveHit(p: Player, m: MoveDef) {
     p.ctx.cam.kickFov(3);
   }
   if (hits.length && m.air) {
-    // Hang: each connecting air hit pops you a little so the juggle can continue.
-    p.velocity.y = Math.max(p.velocity.y, m.air.pop * 0.6);
+    // Hang: each connecting air hit halts the fall so the juggle can continue (no extra height).
+    p.velocity.y = Math.max(p.velocity.y, 0);
   }
   return hits;
 }
@@ -489,7 +492,7 @@ function enterPlunge(p: Player) {
   s.plungeLanded = 0;
   p.velocity.x *= 0.25;
   p.velocity.z *= 0.25;
-  p.velocity.y = 3;
+  p.velocity.y = 0; // brief hang at the current height, then dive (no upward hop)
   p.model.play('1H_Melee_Attack_Chop', { fade: 0.05, loop: false, speed: 1.0, startAt: 0.15, restart: true });
   if (p.trail) p.trail.active = true;
   emitAttack(p, 'plunge', '1H_Melee_Attack_Chop', 1, 0.15, true);

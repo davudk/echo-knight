@@ -47,8 +47,9 @@ Conflicting picks are greyed out with the reason (e.g. Echo Platform excludes Ae
 - **Combo strings** (full list in-game with **F1**): L L L (two slashes + Riven-style leap slam), L L H launcher
   (then jump after it for an air combo ending in a spike), L H spinning slash, H H H heavy string (the kick
   guard-breaks), hold H to charge 3 tiers, → H lunging stab, ← L backflip slash, roll → L sweep, air dash → L
-  piercing dash strike, L+H whirlwind. Inputs are buffered; attacks steer toward your stick (or your lock-on
-  target); roll/jump cancel after the hit frame.
+  piercing dash strike, L+H whirlwind. Inputs are buffered; attacks turn toward your stick (or your lock-on
+  target) and only step/lunge while you hold a direction — no stick input = attack in place. Air attacks
+  hang you in place but never gain height. Roll/jump cancel after the hit frame.
 - **Defense style** (loadout, pick one): *Block & Parry* (hold to block frontal hits; tap just before a hit to
   parry → slow-mo + riposte for double damage) · *Perfect Dodge* (roll right as a hit lands → witch time) ·
   *Counter* (press block when the "!" flashes over an attacking enemy → cinematic reversal). Optional **Stamina**
