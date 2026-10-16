@@ -89,7 +89,8 @@ export class BossBar {
     if (r) return r;
     const el = document.createElement('div');
     el.className = 'ek-boss';
-    const thresholds = b.def.phases.slice(1).map((p) => p.threshold);
+    // thresholds ≤ 0 are phases entered by a boss mechanic (not by HP): no tick
+    const thresholds = b.def.phases.slice(1).map((p) => p.threshold).filter((t) => t > 0);
     el.innerHTML = `
       <div class="name">${esc(b.name)}${b.def.title ? `<small>${esc(b.def.title)}</small>` : ''}</div>
       <div class="hp"><div class="trail"></div><div class="fill"></div>

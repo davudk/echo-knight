@@ -241,6 +241,36 @@ export const Sounds = {
     v.noise({ color: 'brown', filter: 'lowpass', f0: 160, f1: 90, dur: 2.0, attack: 0.5, gain: 0.8 });
     v.osc({ type: 'sawtooth', f0: 38, f1: 30, dur: 1.8, attack: 0.4, gain: 0.08, lowpass: 200 });
   },
+  // The Hunter (boss/hunter): katana deflect, smoke, ambush shimmer, lightning, deathblow
+  deflectClang(v) {
+    const i = 0.8 + 0.4 * clamp01(v.intensity || 1);
+    v.partials({ base: rnd(1180, 1320), ratios: [1, 2.32, 3.97, 5.81], dur: 0.9, gain: 0.15 * i, spread: 0.5 });
+    v.partials({ base: rnd(560, 620), ratios: [1, 2.76], dur: 0.5, gain: 0.08 * i });
+    v.noise({ filter: 'highpass', f0: 5200, dur: 0.03, gain: 0.45 * i });
+    v.osc({ type: 'square', f0: 2600, f1: 900, dur: 0.03, gain: 0.08, lowpass: 5000 });
+  },
+  smokeVanish(v) {
+    v.noise({ f0: 900, f1: 300, q: 0.6, dur: 0.6, attack: 0.01, gain: 0.35 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 500, dur: 0.25, gain: 0.4 });
+    v.osc({ f0: 700, f1: 160, dur: 0.12, gain: 0.08 });
+  },
+  shimmer(v) {
+    v.partials({ base: 1760, ratios: [1, 1.5, 2.01, 2.5], dur: 0.7, gain: 0.05, attack: 0.15, spread: 0.3 });
+    v.noise({ f0: 6000, f1: 3000, q: 2, dur: 0.5, attack: 0.2, gain: 0.08 });
+  },
+  thunder(v) {
+    const i = clamp01(v.intensity || 1);
+    v.noise({ filter: 'highpass', f0: 3000, dur: 0.06, gain: 0.5 * i });
+    v.noise({ f0: 4000, f1: 800, q: 0.7, dur: 0.25, gain: 0.35 * i });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 380, f1: 70, dur: 1.4, attack: 0.04, gain: 0.8 * i, delay: 0.05 });
+    thud(v, 70, 28, 0.9, 0.6 * i, 0.04);
+  },
+  deathblow(v) {
+    v.noise({ f0: 3000, f1: 900, q: 1.1, dur: 0.18, attack: 0.01, gain: 0.5 });
+    thud(v, 110, 30, 0.6, 1.0, 0.05);
+    v.partials({ base: 147, ratios: [1, 1.5, 2.02], dur: 2.2, gain: 0.07, attack: 0.05, delay: 0.1 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 600, f1: 90, dur: 0.9, gain: 0.5, delay: 0.05 });
+  },
   fogGate(v) {
     v.noise({ f0: 400, f1: 1600, q: 0.7, dur: 0.9, attack: 0.25, gain: 0.25 });
     v.partials({ base: 262, ratios: [1, 1.5, 2], dur: 1.0, gain: 0.04, attack: 0.2 });

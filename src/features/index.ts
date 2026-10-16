@@ -18,6 +18,7 @@ import { twinsFeature } from '../boss/twins/feature';
 import { stormcallerFeature } from '../boss/stormcaller/feature';
 import { colossusFeature } from '../boss/colossus/arena';
 import { wardenFeature } from '../boss/warden/wardenFeature';
+import { hunterFeature } from '../boss/hunter/hunterFeature';
 
 /**
  * A feature plugs into the game without the game knowing its internals.
@@ -65,4 +66,5 @@ export const features: Feature[] = [
   stormcallerFeature,
   colossusFeature,
   wardenFeature,
+  hunterFeature,
 ];
