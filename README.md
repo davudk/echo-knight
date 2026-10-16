@@ -39,6 +39,13 @@ Click the screen to start (locks the mouse). Press **Esc** to release it / pause
 - **Echo**: leave a hologram of yourself (6 s, flickers before it fades). Press again to teleport into it.
   Works mid-air, refreshes your air dash. Short cooldown afterwards.
 
+- **Enemies** (grunts between the arena and the town, and in the town plaza): they patrol, notice you (~12 m),
+  chase, circle, then **telegraph** each swing (glowing sword and eyes, ~0.6 s) before striking. At most two
+  attack at once. Hit them out of recovery; heavy hits interrupt wind-ups; launchers juggle them; they sometimes
+  guard light frontal hits. They die, fade and respawn after ~6 s.
+- **Health**: 100 HP (bar top-left, trailing damage segment). Getting hit flinches you with brief invulnerability;
+  at 0 HP you die and respawn at the start. Console: `game.enemies.spawnNear(game.player)` drops a grunt in front of you.
+
 The ruined pillars and the stepping stones to the south-west are climbable; try jump → air dash → echo chains.
 
 **Ruined town** (north, ~60 m up the road from the arena, `src/world/Town.ts`): a gatehouse with battlements faces the arena,
@@ -62,6 +69,9 @@ plaza patrol loop for enemies.
 | `src/abilities/EchoRecall.ts` | The echo / shadow-recall ability |
 | `src/fx/*` | Hologram shader, ghosts/afterimages, particles, sword trail, shockwaves |
 | `src/world/*` | Terrain heightfield, props & colliders, training dummies, sky/lighting, ruined town (`Town.ts`) |
+| `src/enemy/*` | Enemy grunt AI / reactions (`Enemy.ts`), spawning + attack tokens (`EnemyManager.ts`), feature wiring |
+| `src/player/states/hurt.ts` | Player `hurt` / `dead` states, post-hit grace, respawn |
+| `src/ui/HealthBars.ts` | Player HP bar, low-HP vignette, death screen, enemy health bars |
 | `src/ui/HUD.ts` | Control prompts (auto-switch by device), ability bar, combo pips, damage numbers |
 | `src/audio/*` | Procedural WebAudio sound effects (`sounds.ts` recipes, `audioFeature.ts` event → sound map). Dev: `sfx.debug = true` logs every sound with its event, `await sfxTest()` renders each recipe offline |
 | `src/ui/StyleMeter.ts` | Combo hit counter + D→S style rank (loadout `combat.styleMeter`) |
@@ -72,3 +82,4 @@ In the browser console, `game` is exposed for debugging (e.g. `game.player.state
 ## Credits
 
 Character: **KayKit Adventurers — Knight** by Kay Lousberg (www.kaylousberg.com), CC0. See `public/models/LICENSE-KayKit.txt`.
+Enemies reuse the same Knight model with dark-tinted armour and glowing eyes.

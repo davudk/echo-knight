@@ -18,6 +18,11 @@ const HIDDEN_NODES = ['1H_Sword_Offhand', 'Badge_Shield', 'Rectangle_Shield', 'R
 /** Clips whose root bone carries horizontal root motion — we drive movement from code instead. */
 const STRIP_ROOT_MOTION = /^Dodge_/;
 
+export interface ModelOptions {
+  /** node names to hide (defaults to the knight's spare gear) */
+  hide?: string[];
+}
+
 export interface PlayOptions {
   fade?: number;
   loop?: boolean;
@@ -47,10 +52,10 @@ export class CharacterModel {
   private current: AnimationAction | null = null;
   currentName = '';
 
-  private constructor(scene: Object3D, clips: AnimationClip[], height: number) {
+  private constructor(scene: Object3D, clips: AnimationClip[], height: number, opts: ModelOptions = {}) {
     this.model = scene;
 
-    for (const name of HIDDEN_NODES) {
+    for (const name of opts.hide ?? HIDDEN_NODES) {
       const n = scene.getObjectByName(name);
       if (n) n.visible = false;
     }
@@ -91,6 +96,11 @@ export class CharacterModel {
   static async load(url: string, height: number): Promise<CharacterModel> {
     const gltf = await new GLTFLoader().loadAsync(url);
     return new CharacterModel(gltf.scene, gltf.animations, height);
+  }
+
+  /** Build from an already-loaded (e.g. SkeletonUtils-cloned) scene — used for enemies. */
+  static fromScene(scene: Object3D, clips: AnimationClip[], height: number, opts: ModelOptions = {}): CharacterModel {
+    return new CharacterModel(scene, clips, height, opts);
   }
 
   /** Find hilt→tip along the blade's longest local axis. */

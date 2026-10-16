@@ -7,6 +7,7 @@ import { styleMeterFeature } from '../ui/StyleMeter';
 import { trainingFeature } from '../ui/Training';
 import { loadoutFeature } from '../ui/LoadoutPanel';
 import { townFeature } from '../world/Town';
+import { enemyFeature } from '../enemy/enemyFeature';
 
 /**
  * A feature plugs into the game without the game knowing its internals.
@@ -43,4 +44,5 @@ export const features: Feature[] = [
   trainingFeature,
   loadoutFeature,
   townFeature,
+  enemyFeature,
 ];
