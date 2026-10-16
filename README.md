@@ -11,6 +11,10 @@ npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build into dist/
 ```
 
+**Play online:** https://echo-knight-mobility-demo.web.app
+
+Deploy: `npm run build && firebase deploy --only hosting` (project `echo-knight-mobility-demo`).
+
 Click the screen to start (locks the mouse). Press **Esc** to release it / pause. A gamepad works as soon as you press a button.
 
 ## Controls
