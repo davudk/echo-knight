@@ -211,7 +211,7 @@ Story ×0.5 dmg, ×1.3 windows, 5 flasks, ×0.7 HP · Normal ×1, 3 flasks · So
 ## Testing recipes (`window.dbg`, dev server)
 
 ```js
-dbg.freeze(); dbg.start(); dbg.tp(0, 48, 0);                 // empty flat ground (twins region)
+dbg.freeze(); dbg.start(); dbg.tp(30, 30, 0);                // open ground away from every boss arena
 const B = await game.bosses.spawnTest({ distance: 17 });     // Sentinel + test arena in front of you
 dbg.down('KeyW'); dbg.step(1.8); dbg.up('KeyW');             // walk through the fog → fight starts
 B.director.delay(99);                                        // freeze the AI between scripted attacks
