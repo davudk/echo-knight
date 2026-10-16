@@ -42,16 +42,15 @@ const SoundMap: Record<string, (p: Payload, play: Play) => void> = {
   'enemy:attack': (p, play) => play('enemyAttack', { pos: p.position }),
   'loadout:changed': (_p, play) => play('uiClick', { ui: true }),
   'ui:pause': (p, play) => play('uiPause', { ui: true, variant: p.paused ? 'open' : 'resume' }),
-  // Events other workstreams are adding (names guessed; extra entries cost nothing).
+  // Movement kit
   'player:slide': (p, play) => play('slide', { pos: p.position }),
+  'player:longjump': (p, play) => play('airDash', { pos: p.position }),
   'player:wallrun': (p, play) => play('grab', { pos: p.position }),
-  'player:wall-run': (p, play) => play('grab', { pos: p.position }),
   'player:walljump': (p, play) => play('jump', { pos: p.position }),
-  'player:wall-jump': (p, play) => play('jump', { pos: p.position }),
-  'player:ledge': (p, play) => play('grab', { pos: p.position }),
-  'player:ledge-grab': (p, play) => play('grab', { pos: p.position }),
-  'player:climb': (p, play) => play('roll', { pos: p.position }),
-  'player:ledge-climb': (p, play) => play('roll', { pos: p.position }),
+  'player:ledge': (p, play) => play(p.action === 'climb' || p.action === 'vault' ? 'roll' : p.action === 'jump' ? 'jump' : 'grab', { pos: p.position }),
+  'gym:finish': (_p, play) => play('rankUp', { ui: true }),
+  // Echo extras
+  'echo:fizzle': (_p, play) => play('uiClick', { ui: true }),
   'echo:shockwave': (p, play) => play('echoShockwave', { pos: p.position }),
 };
 
