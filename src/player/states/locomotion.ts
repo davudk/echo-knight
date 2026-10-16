@@ -1,7 +1,8 @@
 import { Vector3 } from 'three';
 import { Tuning } from '../../config/tuning';
 import { events } from '../../core/Events';
-import { clamp, dampAngle, easeInOutSine, lerp } from '../../core/math';
+import { loadout } from '../../core/Loadout';
+import { clamp, dampAngle, easeInOutSine, easeOutCubic, lerp } from '../../core/math';
 import { Colors } from '../../fx/Fx';
 import type { Player } from '../Player';
 
@@ -13,6 +14,10 @@ const P = Tuning.player;
 const J = Tuning.jump;
 const D = Tuning.dodge;
 const AD = Tuning.airDash;
+const M = Tuning.movement;
+
+/** How the air state should pose the body (set on entering `air`). */
+export type AirPose = 'none' | 'flip' | 'long';
 
 // Module-local state data (single player).
 const s = {
@@ -23,13 +28,21 @@ const s = {
   dodgeDistance: 0,
   backstep: false,
   afterimageTimer: 0,
+  airPose: 'none' as AirPose,
+  /** eight-way dash: vertical component (sin of the dash angle), 0 = flat */
+  dashVert: 0,
+  /** ignore early jump-button release for this airtime (wall kicks, long jumps) */
+  fullArc: false,
 };
 
 export function installLocomotion(p: Player) {
   p.registerState('move', { update: updateMove });
-  p.registerState('air', { enter: enterAir, update: updateAir });
+  p.registerState('air', { enter: enterAir, update: updateAir, visual: airVisual });
   p.registerState('dodge', { enter: enterDodge, update: updateDodge, visual: dodgeVisual });
-  p.registerState('airdash', { enter: enterAirDash, update: updateAirDash, visual: (_p, o) => (o.pitch = 0.45) });
+  p.registerState('airdash', {
+    enter: enterAirDash, update: updateAirDash,
+    visual: (_p, o) => (o.pitch = 0.45 - s.dashVert * 0.9),
+  });
 
   p.registerInterrupt({ name: 'jump', priority: 100, contexts: ['ground', 'air', 'cancel'], check: tryJump });
   p.registerInterrupt({
@@ -52,6 +65,20 @@ export function installLocomotion(p: Player) {
     if (impact < -12) pl.ctx.cam.shake(0.12);
     return true;
   });
+
+  // Landing mid-dash (down-diagonal dashes, or dashing onto rising ground): end the dash.
+  p.landHandlers.push((pl) => {
+    if (pl.state !== 'airdash') return false;
+    const hs = Math.hypot(pl.velocity.x, pl.velocity.z);
+    const keep = Math.min(hs, AD.exitSpeed) / Math.max(hs, 1e-3);
+    pl.velocity.x *= keep;
+    pl.velocity.z *= keep;
+    pl.ctx.fx.dustPuff(pl.position, 10, 3);
+    // Slide out of a down-dash when the slide upgrade is on.
+    if (loadout.has('move.slide') && pl.states.has('slide') && s.dashVert < 0) pl.go('slide', { speed: hs * 0.8 });
+    else pl.go('move');
+    return true;
+  });
 }
 
 // ------------------------------------------------------------------ jump
@@ -66,7 +93,7 @@ export function tryJump(p: Player): boolean {
   if (!p.input.consume('jump', J.bufferTime)) return false;
   const airJump = used;
   p.jumpsUsed = used + 1;
-  p.velocity.y = J.velocity * (airJump ? 0.88 : 1);
+  p.velocity.y = J.velocity * (airJump ? M.airJumpScale[Math.min(airJump, M.airJumpScale.length) - 1] : 1);
   p.grounded = false;
   p.variableJump = true;
   if (airJump) {
@@ -118,7 +145,9 @@ function updateMove(p: Player, dt: number) {
 
 // ------------------------------------------------------------------ air
 function enterAir(p: Player, data?: unknown) {
-  const d = (data ?? {}) as { jumped?: boolean; airJump?: number };
+  const d = (data ?? {}) as { jumped?: boolean; airJump?: number; pose?: AirPose; fullArc?: boolean };
+  s.airPose = d.pose ?? (d.airJump ? 'flip' : 'none');
+  s.fullArc = !!d.fullArc || s.airPose === 'long';
   if (d.jumped) {
     if (d.airJump) p.model.play('Jump_Start', { fade: 0.05, loop: false, speed: 2.6, startAt: 0.25, restart: true });
     else p.model.play('Jump_Start', { fade: 0.06, loop: false, speed: 2.2, startAt: 0.15, restart: true });
@@ -127,7 +156,23 @@ function enterAir(p: Player, data?: unknown) {
   }
 }
 
+/** Front flip on air jumps / wall kicks, superman lean on long jumps. */
+function airVisual(p: Player, o: { pitch: number; lift: number; squash: number }) {
+  const t = p.stateTime;
+  if (s.airPose === 'flip') {
+    const u = clamp(t / M.airJumpFlip, 0, 1);
+    o.pitch = easeOutCubic(u) * Math.PI * 2;
+    const tuck = Math.sin(u * Math.PI);
+    o.lift = tuck * 0.25;
+    o.squash = 1 - tuck * 0.22;
+  } else if (s.airPose === 'long') {
+    // lean into the jump, straighten as the fall speeds up (ready to land)
+    o.pitch = 0.42 * clamp((p.velocity.y + 9) / 9, 0, 1);
+  }
+}
+
 function updateAir(p: Player, dt: number) {
+  if (s.fullArc) p.fullJumpArc = true; // long jumps / wall kicks always get the full arc
   if (p.runInterrupts('air')) return;
 
   const hs = Math.hypot(p.velocity.x, p.velocity.z);
@@ -206,7 +251,14 @@ function enterAirDash(p: Player) {
   const dir = p.moveMag > 0.1 ? p.moveDir : p.forward;
   s.dodgeDir.copy(dir).setY(0).normalize();
   p.facing = Math.atan2(s.dodgeDir.x, s.dodgeDir.z);
-  p.velocity.set(s.dodgeDir.x * AD.speed, 0, s.dodgeDir.z * AD.speed);
+  // Eight-way: hold jump = up-diagonal, hold sprint = down-diagonal (same on keyboard and pad).
+  s.dashVert = 0;
+  if (loadout.is('move.dashDir', 'eight-way')) {
+    if (p.input.held('jump')) s.dashVert = Math.sin(M.dashUpAngle);
+    else if (p.input.held('sprint')) s.dashVert = -Math.sin(M.dashDownAngle);
+  }
+  const flat = Math.sqrt(1 - s.dashVert * s.dashVert);
+  p.velocity.set(s.dodgeDir.x * AD.speed * flat, s.dashVert * AD.speed, s.dodgeDir.z * AD.speed * flat);
   p.variableJump = false;
   s.afterimageTimer = 0;
   p.model.play('Dodge_Forward', { fade: 0.04, loop: false, speed: 1.1, startAt: 0.05, restart: true });
@@ -217,12 +269,14 @@ function enterAirDash(p: Player) {
     velocity: s.dodgeDir.clone().multiplyScalar(-6), speed: 3, life: [0.2, 0.45], size: [0.05, 0.12],
     color: Colors.dash, color2: Colors.echoParticle, drag: 3,
   });
-  events.emit('player:airdash', { position: p.position.clone(), dir: s.dodgeDir.clone() });
+  const dir3 = s.dodgeDir.clone().multiplyScalar(flat).setY(s.dashVert);
+  events.emit('player:airdash', { position: p.position.clone(), dir: dir3 });
 }
 
 function updateAirDash(p: Player, dt: number) {
   p.gravityScale = 0;
-  p.velocity.set(s.dodgeDir.x * AD.speed, s.dodgeDir.y * AD.speed, s.dodgeDir.z * AD.speed);
+  const flat = Math.sqrt(1 - s.dashVert * s.dashVert);
+  p.velocity.set(s.dodgeDir.x * AD.speed * flat, s.dashVert * AD.speed, s.dodgeDir.z * AD.speed * flat);
   s.afterimageTimer -= dt;
   if (s.afterimageTimer <= 0) {
     s.afterimageTimer = AD.afterimageInterval;
@@ -230,11 +284,17 @@ function updateAirDash(p: Player, dt: number) {
   }
   if (p.stateTime > 0.08 && p.runInterrupts('cancel')) return;
   if (p.stateTime >= AD.duration) {
-    p.velocity.set(s.dodgeDir.x * AD.exitSpeed, AD.exitVy, s.dodgeDir.z * AD.exitSpeed);
+    // Up-dashes keep some lift; down-dashes keep falling.
+    const vy = s.dashVert > 0 ? AD.exitVy + s.dashVert * 7 : s.dashVert < 0 ? s.dashVert * 10 : AD.exitVy;
+    p.velocity.set(s.dodgeDir.x * AD.exitSpeed * flat, vy, s.dodgeDir.z * AD.exitSpeed * flat);
     p.go('air');
     p.model.play('Jump_Idle', { fade: 0.15 });
   }
 }
 
-/** Direction of the current dash / dodge (for other modules). */
+/** Horizontal (unit, y = 0) direction of the current dash / dodge (for other modules). */
 export const dashDir = s.dodgeDir;
+/** Extra info about the current air dash: `vert` = sine of the vertical angle (+ up, - down, 0 flat). */
+export const dashInfo = {
+  get vert() { return s.dashVert; },
+};

@@ -1,6 +1,8 @@
 import type { Game } from '../core/Game';
 import { installCombat } from '../player/states/combat';
 import { installLocomotion } from '../player/states/locomotion';
+import { installParkour } from '../player/states/parkour';
+import { gymFeature } from '../world/Gym';
 import { echoFeature } from '../abilities/echoFeature';
 
 /**
@@ -23,6 +25,7 @@ const playerCore: Feature = {
   install(game) {
     installLocomotion(game.player);
     installCombat(game.player);
+    installParkour(game.player);
   },
 };
 
@@ -33,4 +36,5 @@ const playerCore: Feature = {
 export const features: Feature[] = [
   playerCore,
   echoFeature,
+  gymFeature,
 ];

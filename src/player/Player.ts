@@ -111,6 +111,8 @@ export class Player {
   gravityScale = 1;
   /** set by a state to suppress the low-jump (button released) gravity multiplier */
   fullJumpArc = false;
+  /** collision body height for this frame (slides lower it); reset to `Tuning.movement.bodyHeight` every frame */
+  bodyHeight = Tuning.movement.bodyHeight;
 
   // Combat bookkeeping (offense stream extends these)
   sinceAttack = 99;
@@ -256,6 +258,7 @@ export class Player {
     const prevFacing = this.facing;
     this.gravityScale = 1;
     this.fullJumpArc = false;
+    this.bodyHeight = Tuning.movement.bodyHeight;
     this.states.get(this.state)?.update(this, dt);
     this.yawRate = dt > 0 ? angleDelta(prevFacing, this.facing) / dt : 0;
 
@@ -282,7 +285,7 @@ export class Player {
     this.position.x += this.velocity.x * dt;
     this.position.z += this.velocity.z * dt;
     this.position.y += this.velocity.y * dt;
-    world.resolveCollisions(this.position, P.radius, P.stepHeight);
+    world.resolveCollisions(this.position, P.radius, P.stepHeight, this.bodyHeight);
 
     // Bonk heads on ceilings (box undersides).
     if (this.velocity.y > 0) {
