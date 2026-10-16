@@ -29,6 +29,7 @@ export class HUD {
           <h1>Echo Knight</h1>
           <p>mobility prototype</p>
           <p class="cta">click or press any button</p>
+          <div class="overlay-menu"></div>
         </div>
       </div>
       <div class="controls"></div>
@@ -90,23 +91,48 @@ export class HUD {
   onOverlayClick(cb: () => void) {
     this.overlay.addEventListener('click', cb);
   }
+  /** Container for pause-menu buttons inside the overlay (filled by the loadout panel). */
+  overlayMenu(): HTMLElement {
+    return this.overlay.querySelector('.overlay-menu')!;
+  }
 
   setDevice(d: Device) {
     const L = PromptLabels[d];
-    const rows: [string, string][] = [
-      ['Move', L.move],
-      ['Camera', L.look],
-      ['Sprint', L.sprint],
-      ['Jump', L.jump],
-      ['Roll · Air dash', L.dodge],
-      ['Attack (×3 combo)', L.attack],
-      ['Echo · Recall', L.echo],
-      ['Recenter cam', L.recenter],
+    const pad = d === 'pad';
+    const sections: [string, [string, string][]][] = [
+      ['Move', [
+        ['Move', L.move],
+        ['Camera', L.look],
+        ['Sprint', L.sprint],
+        ['Jump', L.jump],
+        ['Roll · Air dash', L.dodge],
+      ]],
+      ['Fight', [
+        ['Attack', L.attack],
+        ['Heavy (hold)', L.heavy],
+        ['Block · Parry', L.block],
+        ['Lock-on', L.lockOn],
+      ]],
+      ['Echo', [
+        ['Place · Recall', L.echo],
+        ['Recall latest', `Hold ${L.echo}`],
+      ]],
+      ['Menu', [
+        ['Loadout', L.loadout],
+        ...(L.recenter && L.recenter !== L.lockOn ? [['Recenter cam', L.recenter] as [string, string]] : []),
+        ...(pad ? [] : [['Help · FPS', 'H · F3'] as [string, string]]),
+      ]],
     ];
     this.controls.innerHTML =
-      `<div class="title">${d === 'pad' ? 'Gamepad' : 'Keyboard & Mouse'}</div>` +
-      rows.map(([a, k]) => `<div class="row"><span>${a}</span><kbd>${k}</kbd></div>`).join('') +
-      `<div class="row" style="margin-top:4px"><span>Toggle help / FPS</span><kbd>H / F3</kbd></div>`;
+      `<div class="title">${pad ? 'Gamepad' : 'Keyboard & Mouse'}${pad ? '' : '<span class="hint">H</span>'}</div>` +
+      `<div class="sections">${sections
+        .map(
+          ([title, rows]) =>
+            `<div class="section"><div class="sec-title">${title}</div>` +
+            rows.map(([a, k]) => `<div class="row"><span>${a}</span><kbd>${k}</kbd></div>`).join('') +
+            `</div>`,
+        )
+        .join('')}</div>`;
     this.dashKey.textContent = L.dodge;
     this.echo.key.textContent = L.echo;
   }

@@ -5,6 +5,7 @@ import { echoFeature } from '../abilities/echoFeature';
 import { audioFeature } from '../audio/audioFeature';
 import { styleMeterFeature } from '../ui/StyleMeter';
 import { trainingFeature } from '../ui/Training';
+import { loadoutFeature } from '../ui/LoadoutPanel';
 
 /**
  * A feature plugs into the game without the game knowing its internals.
@@ -39,4 +40,5 @@ export const features: Feature[] = [
   audioFeature,
   styleMeterFeature,
   trainingFeature,
+  loadoutFeature,
 ];
