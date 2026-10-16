@@ -8,9 +8,10 @@ import { HUD } from './HUD';
  */
 const CSS = `
 .ek-bossbars { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); width: min(64vw, 760px);
-  display: flex; flex-direction: column-reverse; gap: 10px; pointer-events: none; }
-.ek-boss { opacity: 0; transition: opacity 0.6s ease; }
-.ek-boss.show { opacity: 1; }
+  display: flex; flex-direction: column-reverse; pointer-events: none; }
+/* Every registered boss owns a bar; hidden ones collapse so the visible bar(s) sit at the bottom. */
+.ek-boss { opacity: 0; max-height: 0; overflow: hidden; transition: opacity 0.6s ease, max-height 0s linear 0.6s; }
+.ek-boss.show { opacity: 1; max-height: 80px; margin-top: 10px; transition: opacity 0.6s ease; }
 .ek-boss .name { font-family: "Cinzel", "Trajan Pro", Georgia, serif; font-variant: small-caps; font-size: 17px; letter-spacing: 0.1em;
   color: #efe4cc; text-shadow: 0 1px 3px #000, 0 0 10px rgba(0,0,0,0.7); margin: 0 0 4px 2px; display: flex; align-items: baseline; gap: 10px; }
 .ek-boss .name small { font-size: 11px; letter-spacing: 0.18em; color: rgba(240,179,90,0.75); font-variant: normal; text-transform: uppercase; }

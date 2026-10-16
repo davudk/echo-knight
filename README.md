@@ -55,6 +55,14 @@ Conflicting picks are greyed out with the reason (e.g. Echo Platform excludes Ae
   (magic) telegraphs, poise breaks into a stagger with a riposte finisher, the fight resets at the gate when you die.
   Dev: **Shift+B** or `game.bosses.spawnTest()` drops *The Gate Sentinel*, the framework's example mini-boss.
 
+| Boss | Where (Travel) | What it tests |
+|---|---|---|
+| **The Hollow Warden** | Warden's Keep (north-west of town) | Parry rhythm (delayed third hit), echo ambush / mimic / mirror-swap, void floods that force you onto pillars and the wall walk, echo storm + execution |
+| **The Bell Colossus** | West Ruins | Climbing a moving giant to glowing runes (stone barely takes damage), jumping shockwaves, surviving shake-offs, arena-wide tolls |
+| **The Twin Wardens** | The Duelling Ring (south) | Two bosses: Varek presses, Selene wards / heals / blinks; kill order changes how the survivor enrages |
+| **Kaede, the Last Hunter** | Shrine of Falling Petals (south-east) | Sekiro-style posture duel: deflect strings, answer perilous sweep / thrust / grab, two lives, lightning reversal |
+| **Ysolde, the Stormcaller** | Storm Plateau (north-east) | Closing gaps on a teleporting caster, parrying bolts back, chain lightning to jump / slide, storm event with collapsing floor |
+
 ## Mechanics
 
 - **Combo strings** (full list in-game with **F1**): L L L (two slashes + Riven-style leap slam), L L H launcher
