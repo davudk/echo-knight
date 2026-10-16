@@ -7,7 +7,7 @@ import { loadout } from '../core/Loadout';
 import { angleDelta, clamp, damp, lerp } from '../core/math';
 import type { Fx } from '../fx/Fx';
 import { SwordTrail } from '../fx/SwordTrail';
-import type { World } from '../world/World';
+import type { Collider, World } from '../world/World';
 import type { CharacterModel } from './CharacterModel';
 
 const P = Tuning.player;
@@ -136,6 +136,19 @@ export class Player {
   readonly defenseHandlers: DefenseHandler[] = [];
   readonly spawnPoint = new Vector3();
 
+  /**
+   * Moving platforms (generic): the collider the player stood on / hung from at the end of the last
+   * frame. If its owner moved it since (x / z / yaw / top changed), the player is carried along by the
+   * same rigid motion at the start of the next frame. Static colliders never move, so this is free.
+   */
+  platform: Collider | null = null;
+  /** a state can attach the player to a collider it isn't standing on (ledge hang / climb). Cleared on every state change. */
+  attached: Collider | null = null;
+  /** carry applied at the start of this frame (states re-anchor stored positions with it) */
+  readonly carryDelta = new Vector3();
+  carryYaw = 0;
+  private readonly platPose = { x: 0, z: 0, yaw: 0, top: 0 };
+
   private yawRate = 0;
   private lean = 0;
   private readonly fwd = new Vector3();
@@ -179,6 +192,7 @@ export class Player {
     this.state = name;
     this.stateTime = 0;
     this.invulnerable = false;
+    this.attached = null;
     next.enter?.(this, data);
   }
 
@@ -262,6 +276,7 @@ export class Player {
       this.comboShown = -1;
     }
 
+    this.applyCarry();
     const prevFacing = this.facing;
     this.gravityScale = 1;
     this.fullJumpArc = false;
@@ -270,11 +285,56 @@ export class Player {
     this.yawRate = dt > 0 ? angleDelta(prevFacing, this.facing) / dt : 0;
 
     this.integrate(dt);
+    this.trackPlatform();
     this.syncVisual(dt);
     this.model.update(dt);
     this.trail?.update(dt);
 
     if (this.position.y < -40) this.teleport(this.spawnPoint, Math.PI);
+  }
+
+  // ---------------------------------------------------------------- moving platforms
+  /** Carry the player by the platform's motion since the last frame (rigid: translation + yaw). */
+  private applyCarry() {
+    this.carryDelta.set(0, 0, 0);
+    this.carryYaw = 0;
+    const c = this.platform;
+    if (!c || this.dead) return;
+    const pp = this.platPose;
+    const yaw = c.kind === 'box' ? c.yaw : 0;
+    const dyaw = yaw - pp.yaw;
+    const ox = this.position.x - pp.x;
+    const oz = this.position.z - pp.z;
+    const cs = Math.cos(dyaw);
+    const sn = Math.sin(dyaw);
+    const dx = c.x + ox * cs + oz * sn - this.position.x;
+    const dz = c.z - ox * sn + oz * cs - this.position.z;
+    const dy = c.top - pp.top;
+    if (Math.abs(dx) + Math.abs(dy) + Math.abs(dz) + Math.abs(dyaw) < 1e-6) return;
+    // the platform jumped (switched off / reset): don't fling the player
+    if (Math.hypot(dx, dz) > 2.5 || Math.abs(dy) > 2.5) {
+      this.platform = null;
+      return;
+    }
+    this.position.x += dx;
+    this.position.y += dy;
+    this.position.z += dz;
+    this.facing += dyaw;
+    this.carryDelta.set(dx, dy, dz);
+    this.carryYaw = dyaw;
+  }
+
+  /** Remember what we stand on (or what a state attached us to) and its pose. */
+  private trackPlatform() {
+    const { world } = this.ctx;
+    const c = this.attached ?? (this.grounded ? world.groundCollider(this.position.x, this.position.z, this.position.y, P.stepHeight) : null);
+    this.platform = c;
+    if (!c) return;
+    const pp = this.platPose;
+    pp.x = c.x;
+    pp.z = c.z;
+    pp.yaw = c.kind === 'box' ? c.yaw : 0;
+    pp.top = c.top;
   }
 
   // ---------------------------------------------------------------- physics
@@ -357,6 +417,7 @@ export class Player {
     this.position.copy(pos);
     this.velocity.set(0, 0, 0);
     this.facing = facing;
+    this.platform = null;
     if (opts.refresh !== false) {
       this.airDashCharges = this.maxAirDashes;
       this.jumpsUsed = Math.min(this.jumpsUsed, 1);

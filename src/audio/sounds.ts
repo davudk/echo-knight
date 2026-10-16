@@ -195,6 +195,52 @@ export const Sounds = {
     v.partials({ base: 196, ratios: [1, 1.5, 2, 3], dur: 2.6, gain: 0.06, attack: 0.3 });
     v.noise({ color: 'brown', filter: 'lowpass', f0: 400, f1: 80, dur: 1.6, gain: 0.5 });
   },
+  // ---- The Bell Colossus (src/boss/colossus)
+  /** deep inharmonic bell (minor-third bell partials); variant 'great' = lower, longer */
+  bellToll(v) {
+    const great = v.variant === 'great';
+    const base = great ? 73 : 98;
+    const i = Math.max(0.6, v.intensity || 1);
+    v.partials({ base, ratios: [0.5, 1, 1.19, 1.5, 2, 2.51, 2.66, 3.01, 4.1], dur: great ? 7 : 5.2, gain: 0.2 * i, attack: 0.004, spread: 0.3 });
+    thud(v, 70, 32, 0.5, 0.5 * i);
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 600, f1: 150, dur: 0.6, gain: 0.35 * i });
+    v.noise({ f0: 2400, f1: 900, q: 1.2, dur: 0.08, gain: 0.25 });
+  },
+  bellCrack(v) {
+    v.partials({ base: 104, ratios: [1, 1.07, 1.9, 2.31, 3.3, 4.7], dur: 2.8, gain: 0.16, attack: 0.003, spread: 0.8, type: 'square' });
+    for (let i = 0; i < 9; i++) v.noise({ f0: rnd(1500, 4500), q: 3, dur: rnd(0.02, 0.06), gain: rnd(0.08, 0.2), delay: i * rnd(0.02, 0.06) });
+    thud(v, 90, 30, 0.6, 0.7);
+  },
+  /** the bell hits the ground: a dull clank and a long, wavering ring */
+  bellFall(v) {
+    thud(v, 60, 22, 1.2, 1.0);
+    v.partials({ base: 82, ratios: [0.5, 1, 1.19, 1.5, 2, 2.51, 3.01], dur: 6, gain: 0.22, attack: 0.003, spread: 0.6 });
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 500, f1: 90, dur: 1.4, gain: 0.8 });
+  },
+  /** giant footfall; intensity scales weight */
+  colossusStep(v) {
+    const i = Math.max(0.4, v.intensity || 1);
+    thud(v, 62, 21, 0.9, 0.9 * i);
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 280, f1: 60, dur: 1.0, attack: 0.005, gain: 0.7 * i });
+    for (let k = 0; k < 4; k++) v.noise({ f0: rnd(1200, 3600), q: 4, dur: 0.04, gain: 0.05 * i, delay: 0.08 + k * rnd(0.05, 0.1) });
+  },
+  /** steel glancing off stone */
+  stoneClang(v) {
+    v.partials({ base: rnd(480, 560), ratios: [1, 2.43, 3.9, 5.1], dur: 0.32, gain: 0.07, type: 'square' });
+    v.noise({ filter: 'highpass', f0: 3500, dur: 0.05, gain: 0.3 });
+    thud(v, 160, 90, 0.07, 0.25);
+  },
+  stoneShatter(v) {
+    const i = Math.max(0.6, v.intensity || 1);
+    thud(v, 110, 35, 0.4, 0.7 * i);
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 900, f1: 200, dur: 0.6, gain: 0.6 * i });
+    for (let k = 0; k < 10; k++) v.noise({ f0: rnd(1500, 5000), q: 4, dur: rnd(0.02, 0.05), gain: rnd(0.05, 0.15), delay: 0.03 + k * rnd(0.03, 0.07) });
+  },
+  /** low earth rumble (rising from the ground / shudder wind-up) */
+  rumble(v) {
+    v.noise({ color: 'brown', filter: 'lowpass', f0: 160, f1: 90, dur: 2.0, attack: 0.5, gain: 0.8 });
+    v.osc({ type: 'sawtooth', f0: 38, f1: 30, dur: 1.8, attack: 0.4, gain: 0.08, lowpass: 200 });
+  },
   fogGate(v) {
     v.noise({ f0: 400, f1: 1600, q: 0.7, dur: 0.9, attack: 0.25, gain: 0.25 });
     v.partials({ base: 262, ratios: [1, 1.5, 2], dur: 1.0, gain: 0.04, attack: 0.2 });

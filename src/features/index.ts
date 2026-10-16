@@ -14,6 +14,7 @@ import { offenseFeature } from '../player/states/moves';
 import { defenseFeature } from '../player/states/defense';
 import { healFeature } from '../player/states/heal';
 import { bossFeature } from '../boss/bossFeature';
+import { colossusFeature } from '../boss/colossus/arena';
 
 /**
  * A feature plugs into the game without the game knowing its internals.
@@ -57,4 +58,5 @@ export const features: Feature[] = [
   defenseFeature,
   healFeature,
   bossFeature,
+  colossusFeature,
 ];
