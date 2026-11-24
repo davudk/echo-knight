@@ -3,6 +3,13 @@
 A Souls-inspired, browser-based third-person action prototype (Three.js + TypeScript + Vite),
 focused on responsive movement and mobility tools. See [PLAN.md](PLAN.md) for the design and architecture.
 
+<p>
+  <img src="docs/images/mobility.gif" width="49%" alt="Dash, double jump, air dash and echo recall">
+  <img src="docs/images/title.jpg" width="49%" alt="Title screen">
+</p>
+
+**Play online:** https://echo-knight-mobility-demo.web.app
+
 ## Run
 
 ```bash
@@ -10,8 +17,6 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build into dist/
 ```
-
-**Play online:** https://echo-knight-mobility-demo.web.app
 
 Deploy: `npm run build && firebase deploy --only hosting` (project `echo-knight-mobility-demo`).
 
